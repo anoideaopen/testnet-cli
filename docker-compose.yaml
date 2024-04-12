@@ -1,0 +1,41 @@
+version: "3.9"
+
+networks:
+  monitoring:
+
+services:
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    volumes:
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+    ports:
+      - "3000:3000"
+    networks:
+      - monitoring
+  postgres:
+    image: postgres:15.3
+    container_name: postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: "postgres"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    command: postgres -c 'max_connections=3000'
+    ports:
+      - "5432:5432"
+    networks:
+      - monitoring
+    volumes:
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./postgres/pgdata:/var/lib/postgresql/data/pgdata:rw
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+    networks:
+      - monitoring
