@@ -5,8 +5,8 @@ import (
 	"crypto/ed25519"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"math"
+	"os"
 	"sync"
 	"time"
 
@@ -40,13 +40,13 @@ var scriptCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		scriptJSONFilePath := args[0]
 
-		bytes, err := ioutil.ReadFile(scriptJSONFilePath)
+		bytes, err := os.ReadFile(scriptJSONFilePath)
 		if err != nil {
 			panic(err)
 		}
 
-		var script = Script{}
-		err = json.Unmarshal(bytes, &script)
+		script := &Script{}
+		err = json.Unmarshal(bytes, script)
 		if err != nil {
 			panic(err)
 		}
@@ -57,7 +57,7 @@ var scriptCmd = &cobra.Command{
 	},
 }
 
-func execCommand(command Command) {
+func execCommand(command Command) { //nolint:gocognit
 	initHlfClient()
 
 	// type of report response for example print in log or store metric in InfluxDB
@@ -74,9 +74,11 @@ func execCommand(command Command) {
 
 	requestOptions := prepareRequestOptions()
 
-	var err error
-	var privateKey ed25519.PrivateKey
-	var publicKey ed25519.PublicKey
+	var (
+		err        error
+		privateKey ed25519.PrivateKey
+		publicKey  ed25519.PublicKey
+	)
 	if command.SignerPrivateKey != "" {
 		privateKey, publicKey, err = utils.GetPrivateKey(command.SignerPrivateKey)
 		if err != nil {
@@ -105,9 +107,9 @@ func execCommand(command Command) {
 	wg.Add(numberRequest)
 
 	ctx := context.Background()
-	for i := 0; i < numberRequest; i++ {
+	for range numberRequest {
 		// Wait for the rate limiter to allow the next request
-		err := limiter.WaitN(ctx, 1)
+		err = limiter.WaitN(ctx, 1)
 		if err != nil {
 			panic(err)
 		}
@@ -148,10 +150,10 @@ func execCommand(command Command) {
 					config.Observer.ObserverVersion,
 				)
 				var batch postgres.Batch
-				//err := retryFunc(60, 2*time.Second, func() (err error) {
+				// err := retryFunc(60, 2*time.Second, func() (err error) {
 				batch, err = observer.GetBatch(txID)
-				//return err
-				//})
+				// return err
+				// })
 				if err != nil {
 					logger.GetLogger().Error("get batch from observer", zap.Error(err))
 					return

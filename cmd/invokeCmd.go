@@ -74,7 +74,7 @@ var invokeCmd = &cobra.Command{
 		wg.Add(numberRequest)
 
 		ctx := context.Background()
-		for i := 0; i < numberRequest; i++ {
+		for range numberRequest {
 			// Wait for the rate limiter to allow the next request
 			err := limiter.WaitN(ctx, 1)
 			if err != nil {
@@ -117,10 +117,10 @@ var invokeCmd = &cobra.Command{
 						config.Observer.ObserverVersion,
 					)
 					var batch postgres.Batch
-					//err := retryFunc(60, 2*time.Second, func() (err error) {
+					// err := retryFunc(60, 2*time.Second, func() (err error) {
 					batch, err = observer.GetBatch(txID)
-					//return err
-					//})
+					// return err
+					// })
 					if err != nil {
 						logger.GetLogger().Error("get batch from observer", zap.Error(err))
 						return
@@ -164,19 +164,16 @@ func prepareRequestOptions() []channel.RequestOption {
 	return requestOptions
 }
 
-func retryFunc(attempts int, sleep time.Duration, f func() error) (err error) {
+func retryFunc(attempts int, sleep time.Duration, f func() error) (err error) { //nolint:unused
 	startRetry := time.Now()
-	for i := 0; ; i++ {
+	for range attempts {
 		err = f()
 		if err == nil {
-			return
-		}
-		if i >= (attempts - 1) {
-			break
+			return nil
 		}
 		time.Sleep(sleep)
-		d := time.Now().Sub(startRetry)
+		d := time.Since(startRetry)
 		logger.GetLogger().Error("retrying after error:", zap.Error(err), zap.Duration("duration", d))
 	}
-	return fmt.Errorf("after %d attempts, last error: %s", attempts, err)
+	return fmt.Errorf("after %d attempts, last error: %w", attempts, err)
 }

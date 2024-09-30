@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"strings"
 
 	"github.com/anoideaopen/testnet-cli/logger"
@@ -10,7 +10,7 @@ import (
 	"go.uber.org/zap"
 )
 
-var sendRequestCmd = &cobra.Command{
+var sendRequestCmd = &cobra.Command{ //nolint:unused
 	Use:   "sendRequest",
 	Short: "send to HLF generated message with validator's signatures",
 	Args:  cobra.MinimumNArgs(2), //nolint:gomnd
@@ -25,7 +25,7 @@ var sendRequestCmd = &cobra.Command{
 
 		signatureFilePaths := methodArgs[0]
 
-		data, err := ioutil.ReadFile("message.txt")
+		data, err := os.ReadFile("message.txt")
 		if err != nil {
 			return
 		}
@@ -40,12 +40,12 @@ var sendRequestCmd = &cobra.Command{
 		var signatures []string
 		for _, signatureFilePath := range strings.Split(signatureFilePaths, ",") {
 			filename := fmt.Sprintf("signature-%s.txt", signatureFilePath)
-			data, err := ioutil.ReadFile(filename)
+			data, err := os.ReadFile(filename)
 			logger.Debug(fmt.Sprintf("filename %s\n", filename))
 			if err != nil {
 				return
 			}
-			logger.Debug(fmt.Sprintf("data: %s", string(data)))
+			logger.Debug("data: " + string(data))
 			signatures = append(signatures, string(data))
 		}
 

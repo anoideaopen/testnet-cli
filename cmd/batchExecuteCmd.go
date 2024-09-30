@@ -6,7 +6,7 @@ import (
 
 	"github.com/anoideaopen/foundation/proto"
 	"github.com/anoideaopen/testnet-cli/report"
-	pb "github.com/golang/protobuf/proto"
+	pb "github.com/golang/protobuf/proto" //nolint:staticcheck
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/channel"
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/fab"
 	"github.com/spf13/cobra"

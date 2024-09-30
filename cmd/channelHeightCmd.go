@@ -26,6 +26,6 @@ var channelHeightCmd = &cobra.Command{
 		if err != nil {
 			FatalError("Failed to get peer info", err)
 		}
-		fmt.Println(blockchainInfoResponse.BCI.Height)
+		fmt.Println(blockchainInfoResponse.BCI.GetHeight())
 	},
 }

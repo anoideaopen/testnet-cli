@@ -21,7 +21,7 @@ func GetReporterByID(config config.ApplicationConfig) Reporter {
 			config.Postgres.PostgresPort,
 			config.Postgres.PostgresUser,
 			config.Postgres.PostgresPassword,
-			config.Postgres.PostgresDbName,
+			config.Postgres.PostgresDBName,
 		)
 		if err != nil {
 			panic(err)

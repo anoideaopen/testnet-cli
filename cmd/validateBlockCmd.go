@@ -3,8 +3,8 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/http"
+	"os"
 
 	"github.com/anoideaopen/testnet-cli/logger"
 	"github.com/golang/protobuf/proto" //nolint:staticcheck
@@ -15,7 +15,7 @@ import (
 	"go.uber.org/zap"
 )
 
-var validateBlockCmd = &cobra.Command{
+var validateBlockCmd = &cobra.Command{ //nolint:unused
 	Use:   "validateBlock channelID blockID",
 	Short: "validate block by blockID and channel",
 	Args:  cobra.ExactArgs(2), //nolint:gomnd
@@ -33,13 +33,13 @@ var validateBlockCmd = &cobra.Command{
 	},
 }
 
-func validateBlock(channelID string, blockID string) {
+func validateBlock(channelID string, blockID string) { //nolint:unused
 	logger.Info("validateBlock",
 		zap.Any("channel", channelID),
 		zap.Any("blockID", blockID),
 	)
 	file := channelID + "_" + blockID + ".block"
-	bytes, err := ioutil.ReadFile(file)
+	bytes, err := os.ReadFile(file)
 	if err != nil {
 		FatalError("Failed to WriteFile", err)
 	}
@@ -47,24 +47,24 @@ func validateBlock(channelID string, blockID string) {
 	if err != nil {
 		FatalError("Failed to Marshal", err)
 	}
-	if blk == nil || blk.Data == nil || len(blk.Data.Data) == 0 {
+	if len(blk.GetData().GetData()) == 0 {
 		FatalError("bad block", errors.New("invalid block"))
 	}
 
-	txs := blk.Data.Data
+	txs := blk.GetData().GetData()
 	for index, data := range txs {
 		logger.Info("tx", zap.Any("tx", index))
 		parseTx(data)
 	}
 }
 
-func parseTx(envBytes []byte) {
+func parseTx(envBytes []byte) { //nolint:unused
 	processedTransaction := peer.ProcessedTransaction{}
 	err := proto.Unmarshal(envBytes, &processedTransaction)
 	if err != nil {
 		FatalError("unmarshal of transaction proposal processedTransaction failed", err)
 	}
-	logger.Info("processedTransaction.ValidationCode", zap.Any("ValidationCode", processedTransaction.ValidationCode))
+	logger.Info("processedTransaction.ValidationCode", zap.Any("ValidationCode", processedTransaction.GetValidationCode()))
 
 	txID, err := protoutil.GetOrComputeTxIDFromEnvelope(envBytes)
 	if err != nil {
@@ -83,22 +83,22 @@ func parseTx(envBytes []byte) {
 	}
 }
 
-func rwSetByTransactionAction(transactionAction *peer.TransactionAction) {
+func rwSetByTransactionAction(transactionAction *peer.TransactionAction) { //nolint:unused
 	_, ca, err := GetPayloads(transactionAction)
 	if err != nil {
 		return
 	}
 
 	chaincodeEvent := &peer.ChaincodeEvent{}
-	if err = proto.Unmarshal(ca.Events, chaincodeEvent); err != nil {
+	if err = proto.Unmarshal(ca.GetEvents(), chaincodeEvent); err != nil {
 		return
 	}
 
-	logger.Info("chaincodeEvent.EventName", zap.Any("EventName", chaincodeEvent.EventName))
+	logger.Info("chaincodeEvent.EventName", zap.Any("EventName", chaincodeEvent.GetEventName()))
 }
 
-func rwSetByChaincodeAction(chaincodeAction *peer.ChaincodeAction) {
-	if chaincodeAction.Response.Status != http.StatusOK {
+func rwSetByChaincodeAction(chaincodeAction *peer.ChaincodeAction) { //nolint:unused
+	if chaincodeAction.GetResponse().GetStatus() != http.StatusOK {
 		return
 	}
 
@@ -107,10 +107,10 @@ func rwSetByChaincodeAction(chaincodeAction *peer.ChaincodeAction) {
 		FatalError("chaincode events", err)
 	}
 
-	logger.Info("chaincodeEvents.EventName", zap.Any("chaincodeEvents.EventName", chaincodeEvents.EventName))
+	logger.Info("chaincodeEvents.EventName", zap.Any("chaincodeEvents.EventName", chaincodeEvents.GetEventName()))
 
 	txRWSet := &rwsetutil.TxRwSet{}
-	err = txRWSet.FromProtoBytes(chaincodeAction.Results)
+	err = txRWSet.FromProtoBytes(chaincodeAction.GetResults())
 	if err != nil {
 		FatalError("txRWSet From Proto Bytes", err)
 	}
@@ -128,31 +128,31 @@ func ParseTxRWSet(nsRwSet []*rwsetutil.NsRwSet) {
 }
 
 func printReads(set *rwsetutil.NsRwSet) {
-	if len(set.KvRwSet.Reads) == 0 {
+	if len(set.KvRwSet.GetReads()) == 0 {
 		return
 	}
-	logger.Info("KvRwSet.Reads", zap.Any("Reads", set.KvRwSet.Writes))
+	logger.Info("KvRwSet.Reads", zap.Any("Reads", set.KvRwSet.GetReads()))
 }
 
 func printWrites(set *rwsetutil.NsRwSet) {
-	if len(set.KvRwSet.Writes) == 0 {
+	if len(set.KvRwSet.GetWrites()) == 0 {
 		return
 	}
-	logger.Info("KvRwSet.Writes", zap.Any("Writes", set.KvRwSet.Writes))
+	logger.Info("KvRwSet.Writes", zap.Any("Writes", set.KvRwSet.GetWrites()))
 }
 
 func printRangeQueriesInfo(set *rwsetutil.NsRwSet) {
-	if len(set.KvRwSet.RangeQueriesInfo) == 0 {
+	if len(set.KvRwSet.GetRangeQueriesInfo()) == 0 {
 		return
 	}
-	logger.Info("KvRwSet.RangeQueriesInfo", zap.Any("RangeQueriesInfo", set.KvRwSet.RangeQueriesInfo))
+	logger.Info("KvRwSet.RangeQueriesInfo", zap.Any("RangeQueriesInfo", set.KvRwSet.GetRangeQueriesInfo()))
 }
 
 func printMetadataWrites(set *rwsetutil.NsRwSet) {
-	if len(set.KvRwSet.MetadataWrites) == 0 {
+	if len(set.KvRwSet.GetMetadataWrites()) == 0 {
 		return
 	}
-	logger.Info("KvRwSet.MetadataWrites", zap.Any("MetadataWrites", set.KvRwSet.MetadataWrites))
+	logger.Info("KvRwSet.MetadataWrites", zap.Any("MetadataWrites", set.KvRwSet.GetMetadataWrites()))
 }
 
 func printCollectionName(set *rwsetutil.NsRwSet) {
@@ -164,13 +164,13 @@ func printCollectionName(set *rwsetutil.NsRwSet) {
 
 // GetPayloads gets the underlying payload objects in a TransactionAction.
 func GetPayloads(txActions *peer.TransactionAction) (*peer.ChaincodeActionPayload, *peer.ChaincodeAction, error) {
-	ccPayload, err := GetChaincodeActionPayload(txActions.Payload)
+	ccPayload, err := GetChaincodeActionPayload(txActions.GetPayload())
 	if err != nil {
 		return nil, nil, err
 	}
 
 	pRespPayload, err := GetProposalResponsePayload(
-		ccPayload.ChaincodeProposalPayload,
+		ccPayload.GetChaincodeProposalPayload(),
 	)
 	if err != nil {
 		return nil, nil, err
@@ -178,16 +178,16 @@ func GetPayloads(txActions *peer.TransactionAction) (*peer.ChaincodeActionPayloa
 
 	logger.Info("pRespPayload", zap.Any("pRespPayload", pRespPayload))
 
-	if pRespPayload.Extension == nil {
+	if pRespPayload.GetExtension() == nil {
 		return nil, nil, errors.New("extension is nil for txActions.Payload.ChaincodeProposalPayload")
 	}
 
-	respPayload, err := GetChaincodeAction(pRespPayload.Extension)
+	respPayload, err := GetChaincodeAction(pRespPayload.GetExtension())
 	if err != nil {
 		return nil, nil, err
 	}
 
-	payload, err := GetChaincodeActionPayload(respPayload.Results)
+	payload, err := GetChaincodeActionPayload(respPayload.GetResults())
 	if err != nil {
 		return nil, nil, err
 	}
@@ -200,7 +200,7 @@ func GetPayloads(txActions *peer.TransactionAction) (*peer.ChaincodeActionPayloa
 		zap.Any("responsePayload.String()", responsePayload.String()),
 	)
 	logger.Info("payload",
-		zap.Any("payload.ChaincodeProposalPayload", payload.ChaincodeProposalPayload),
+		zap.Any("payload.ChaincodeProposalPayload", payload.GetChaincodeProposalPayload()),
 	)
 
 	return ccPayload, respPayload, nil

@@ -1,10 +1,11 @@
 package observer
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"time"
 
@@ -77,7 +78,12 @@ func (o Observer) TxAPI(txID string) (Tx, error) {
 		Transport: &http.Transport{},
 	}
 
-	req, err := http.NewRequest("GET", o.url+"/"+o.version+"/tx/"+txID, nil)
+	req, err := http.NewRequestWithContext(
+		context.Background(),
+		http.MethodGet,
+		o.url+"/"+o.version+"/tx/"+txID,
+		nil,
+	)
 	if err != nil {
 		fmt.Println("Failed prepare request", err)
 		return Tx{}, err
@@ -94,7 +100,7 @@ func (o Observer) TxAPI(txID string) (Tx, error) {
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Println("Error reading response:", err)
 		return Tx{}, err
@@ -116,19 +122,19 @@ func (o Observer) GetBatch(requestTxID string) (postgres.Batch, error) {
 		return postgres.Batch{}, err
 	}
 	if len(requestTx.Txs) == 0 {
-		err := errors.New("not found txs")
+		err = errors.New("not found txs")
 		logger.Error("TxAPI response txs not found", zap.Error(err))
 		return postgres.Batch{}, err
 	}
 
 	batchID := requestTx.Txs[0].Metadata.BatchID
 	if batchID == "" {
-		err := fmt.Errorf("can't find batchID for request %s", requestTxID)
+		err = fmt.Errorf("can't find batchID for request %s", requestTxID)
 		logger.Debug("GetBatch", zap.Error(err))
 		return postgres.Batch{}, err
 	}
 
-	firstTimestamp := requestTx.Txs[0].Header.Timestamp.(string)
+	firstTimestamp, _ := requestTx.Txs[0].Header.Timestamp.(string)
 
 	batchTx, err := o.TxAPI(batchID)
 	if err != nil {
@@ -137,7 +143,7 @@ func (o Observer) GetBatch(requestTxID string) (postgres.Batch, error) {
 	}
 
 	blockNumber := batchTx.Txs[0].Metadata.Number
-	batchTimestamp := batchTx.Txs[0].Header.Timestamp.(string)
+	batchTimestamp, _ := batchTx.Txs[0].Header.Timestamp.(string)
 	batchValidationCode := batchTx.Txs[0].Metadata.ValidationCode
 	batchErrMsg := batchTx.Txs[0].Metadata.Error
 
@@ -171,7 +177,7 @@ func (o Observer) FetchBatches(db *pg.DB, requests []postgres.Request) {
 			logger.GetLogger().Error("get batch from observer", zap.Error(err))
 			continue
 		} else {
-			if err := postgres.InsertBatch(db, batch); err != nil {
+			if err = postgres.InsertBatch(db, batch); err != nil {
 				panic(err)
 			}
 		}

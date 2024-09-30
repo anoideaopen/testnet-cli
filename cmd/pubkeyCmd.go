@@ -3,7 +3,7 @@ package cmd
 import (
 	"crypto/ed25519"
 	"fmt"
-	"io/ioutil"
+	"os"
 
 	"github.com/anoideaopen/testnet-cli/logger"
 	"github.com/anoideaopen/testnet-cli/utils"
@@ -42,7 +42,7 @@ var pubkeyCmd = &cobra.Command{
 }
 
 func GetPrivateKeyByFile(privateKeyPath string) (privateKeyBytes []byte, err error) {
-	privateKeyBytes, err = ioutil.ReadFile(privateKeyPath)
+	privateKeyBytes, err = os.ReadFile(privateKeyPath)
 	if err != nil {
 		return nil, err
 	}

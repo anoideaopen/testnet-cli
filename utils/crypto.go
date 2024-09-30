@@ -4,7 +4,7 @@ import (
 	"crypto/ed25519"
 	"crypto/rand"
 	"encoding/hex"
-	"fmt"
+	"errors"
 	"strconv"
 	"strings"
 	"time"
@@ -107,7 +107,7 @@ func ConvertPrivateKeyToHex(privateKey ed25519.PrivateKey) string {
 
 func SignACL(signerInfoArray []SignerInfo, methodName string, address string, reason string, reasonID string, newPkey string) ([]string, string, error) {
 	nonce := GetNonce()
-	// 1. проапдейтить для изменения любых транзакций
+	// 1. update to change any transactions
 	// 2.
 	result := []string{methodName, address, reason, reasonID, newPkey, nonce}
 	for _, signerInfo := range signerInfoArray {
@@ -125,7 +125,7 @@ func SignACL(signerInfoArray []SignerInfo, methodName string, address string, re
 	for _, signerInfo := range signerInfoArray {
 		sig := ed25519.Sign(signerInfo.PrivateKey, message[:])
 		if !ed25519.Verify(signerInfo.PublicKey, message[:], sig) {
-			err := fmt.Errorf("valid signature rejected")
+			err := errors.New("valid signature rejected")
 			logger.Error("ed25519.Verify", zap.Error(err))
 			return nil, "", err
 		}
@@ -173,7 +173,7 @@ func GetAddress(secretKey string) (string, error) {
 // secretKey string - private key in base58check, or hex or base58
 func GetAddressByPublicKey(publicKey ed25519.PublicKey) (string, error) {
 	if len(publicKey) == 0 {
-		return "", fmt.Errorf("publicKey can't be empty")
+		return "", errors.New("publicKey can't be empty")
 	}
 
 	hash := sha3.Sum256(publicKey)
@@ -184,7 +184,7 @@ func SignMessage(signerInfo SignerInfo, result []string) ([]byte, [32]byte, erro
 	message := sha3.Sum256([]byte(strings.Join(result, "")))
 	sig := ed25519.Sign(signerInfo.PrivateKey, message[:])
 	if !ed25519.Verify(signerInfo.PublicKey, message[:], sig) {
-		err := fmt.Errorf("valid signature rejected")
+		err := errors.New("valid signature rejected")
 		logger.Error("ed25519.Verify", zap.Error(err))
 		return nil, message, err
 	}

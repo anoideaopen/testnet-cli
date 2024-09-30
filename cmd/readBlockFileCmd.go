@@ -1,17 +1,17 @@
 package cmd
 
-//import (
+// import (
 //	"errors"
 //	"fmt"
-//	"io/ioutil"
+//	"os"
 //
 //	"github.com/golang/protobuf/proto"
 //	cb "github.com/hyperledger/fabric-protos-go/common"
 //	"github.com/spf13/cobra"
 //
-//)
+// )
 //
-//var (
+// var (
 //	readBlockFileCmd = &cobra.Command{
 //		Use:   "readBlockFile channelID blockID peer",
 //		Short: "readBlock by blockID by file",
@@ -37,7 +37,7 @@ package cmd
 //			block := &cb.Block{}
 //
 //			file := channelID + "_" + blockID + ".block"
-//			bytes, err := ioutil.ReadFile(file)
+//			bytes, err := os.ReadFile(file)
 //			if err != nil {
 //				FatalError("failed ReadFile", err)
 //			}
@@ -70,42 +70,42 @@ package cmd
 //
 //			printBlock2(channelID, block)
 //		}}
-//)
+// )
 //
-////
-////func getBlock(channelID string, blockID string, peer string) (*cb.Block, error) {
-////	block, err := HlfClient.QueryBlock(channelID, blockID, peer)
-////	if err != nil {
-////		FatalError("Failed to QueryBlock", err)
-////		return nil, err
-////	}
-////
-////	return block, nil
-////}
-////
-////func saveBlock(channelID string, blockID string, block *cb.Block) error {
-////	logger.Info("================================")
-////	logger.Info("Start save block")
-////	logger.Info("================================")
-////	b, err := proto.Marshal(block)
-////	if err != nil {
-////		return err
-////	}
-////
-////	file := channelID + "_" + blockID + ".block"
-////	if err = ioutil.WriteFile(file, b, 0644); err != nil {
-////		return err
-////	}
-////
-////	logger.Info("================================")
-////	logger.Info("End save block")
-////	logger.Info("================================")
-////	return nil
-////}
-////
-//type TxValidationFlags []uint8
+// //
+// //func getBlock(channelID string, blockID string, peer string) (*cb.Block, error) {
+// //	block, err := HlfClient.QueryBlock(channelID, blockID, peer)
+// //	if err != nil {
+// //		FatalError("Failed to QueryBlock", err)
+// //		return nil, err
+// //	}
+// //
+// //	return block, nil
+// //}
+// //
+// //func saveBlock(channelID string, blockID string, block *cb.Block) error {
+// //	logger.Info("================================")
+// //	logger.Info("Start save block")
+// //	logger.Info("================================")
+// //	b, err := proto.Marshal(block)
+// //	if err != nil {
+// //		return err
+// //	}
+// //
+// //	file := channelID + "_" + blockID + ".block"
+// //	if err = os.WriteFile(file, b, 0644); err != nil {
+// //		return err
+// //	}
+// //
+// //	logger.Info("================================")
+// //	logger.Info("End save block")
+// //	logger.Info("================================")
+// //	return nil
+// //}
+// //
+// type TxValidationFlags []uint8
 //
-//func printBlock2(channelID string, block *cb.Block) {
+// func printBlock2(channelID string, block *cb.Block) {
 //	logger.Info("================================")
 //	logger.Info("Print block")
 //	logger.Info("================================")
@@ -162,4 +162,4 @@ package cmd
 //		//	}
 //		//}
 //	}
-//}
+// }

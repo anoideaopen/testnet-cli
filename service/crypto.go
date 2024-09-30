@@ -4,12 +4,11 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"errors"
-	"fmt"
 	"strings"
 
 	"github.com/anoideaopen/testnet-cli/logger"
 	"github.com/btcsuite/btcutil/base58"
-	"github.com/hashicorp/go-uuid"
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 	"golang.org/x/crypto/ed25519"
 	"golang.org/x/crypto/sha3"
@@ -19,7 +18,7 @@ func SignMessage(signerInfo SignerInfo, result []string) ([]byte, [32]byte, erro
 	message := sha3.Sum256([]byte(strings.Join(result, "")))
 	sig := ed25519.Sign(signerInfo.PrivateKey, message[:])
 	if !ed25519.Verify(signerInfo.PublicKey, message[:], sig) {
-		err := fmt.Errorf("valid signature rejected")
+		err := errors.New("valid signature rejected")
 		logger.Error("ed25519.Verify", zap.Error(err))
 		return nil, message, err
 	}
@@ -28,8 +27,7 @@ func SignMessage(signerInfo SignerInfo, result []string) ([]byte, [32]byte, erro
 
 func Sign(privateKey ed25519.PrivateKey, publicKey ed25519.PublicKey, channel string, chaincode string, methodName string, args []string) ([]string, string, error) {
 	nonce := GetNonce()
-	requestID, err := uuid.GenerateUUID()
-	result := append(append([]string{methodName, requestID, chaincode, channel}, args...), nonce, ConvertPublicKeyToBase58(publicKey))
+	result := append(append([]string{methodName, uuid.NewString(), chaincode, channel}, args...), nonce, ConvertPublicKeyToBase58(publicKey))
 
 	logger.Debug(
 		"For sign",
@@ -42,7 +40,8 @@ func Sign(privateKey ed25519.PrivateKey, publicKey ed25519.PublicKey, channel st
 		return nil, "", err
 	}
 
-	messageWithSig := append(result[1:], base58.Encode(signMessage))
+	var messageWithSig []string
+	messageWithSig = append(append(messageWithSig, result[1:]...), base58.Encode(signMessage))
 	hash := hex.EncodeToString(message[:])
 
 	logger.Debug(
@@ -60,12 +59,10 @@ type SignerInfo struct {
 }
 
 func GenerateMessage(validatorPublicKeys []string, channelID string, chaincodeName string, methodName string, args []string) string {
-	requestId := ""
+	requestID := ""
 	nonce := GetNonce()
-	result := append(append([]string{methodName, requestId, chaincodeName, channelID}, args...), nonce)
-	for _, publicKey := range validatorPublicKeys {
-		result = append(result, publicKey)
-	}
+	result := append(append([]string{methodName, requestID, chaincodeName, channelID}, args...), nonce)
+	result = append(result, validatorPublicKeys...)
 
 	logger.Debug(
 		"For sign",
@@ -97,14 +94,16 @@ func GetPrivateKeySKFromHex(secretKey string) (ed25519.PrivateKey, ed25519.Publi
 		return nil, nil, err
 	}
 
-	return privateKey, ed25519.PrivateKey(privateKey).Public().(ed25519.PublicKey), nil
+	pub, _ := ed25519.PrivateKey(privateKey).Public().(ed25519.PublicKey)
+	return privateKey, pub, nil
 }
 
 // GetPrivateKeySKFromBase58 - get private key type Ed25519 by string - Base58 encoded private key
 // secretKey string - private key in Base58
 func GetPrivateKeySKFromBase58(secretKey string) (ed25519.PrivateKey, ed25519.PublicKey, error) {
 	privateKey := base58.Decode(secretKey)
-	return privateKey, ed25519.PrivateKey(privateKey).Public().(ed25519.PublicKey), nil
+	pub, _ := ed25519.PrivateKey(privateKey).Public().(ed25519.PublicKey)
+	return privateKey, pub, nil
 }
 
 // GetPrivateKeySKFromBase58Check - get private key type Ed25519 by string - Base58Check encoded private key
@@ -115,7 +114,8 @@ func GetPrivateKeySKFromBase58Check(secretKey string) (ed25519.PrivateKey, ed255
 		return nil, nil, err
 	}
 	privateKey := ed25519.PrivateKey(append([]byte{ver}, decode...))
-	return privateKey, privateKey.Public().(ed25519.PublicKey), nil
+	pub, _ := privateKey.Public().(ed25519.PublicKey)
+	return privateKey, pub, nil
 }
 
 // GetAddress - get address by encoded string in standard encoded for project is 'base58.Check'
@@ -171,11 +171,11 @@ func GeneratePrivateKey() (string, error) {
 	return ConvertPrivateKeyToBase58Check(privateKey), nil
 }
 
-func SignACL(signerInfoArray []SignerInfo, methodName string, address string, reason string, reasonId string, newPkey string) ([]string, string, error) {
+func SignACL(signerInfoArray []SignerInfo, methodName string, address string, reason string, reasonID string, newPkey string) ([]string, string, error) {
 	nonce := GetNonce()
-	// 1. проапдейтить для изменения любых транзакций
+	// 1. update to change any transactions
 	// 2.
-	result := []string{methodName, address, reason, reasonId, newPkey, nonce}
+	result := []string{methodName, address, reason, reasonID, newPkey, nonce}
 	for _, signerInfo := range signerInfoArray {
 		result = append(result, ConvertPublicKeyToBase58(signerInfo.PublicKey))
 	}
@@ -191,14 +191,15 @@ func SignACL(signerInfoArray []SignerInfo, methodName string, address string, re
 	for _, signerInfo := range signerInfoArray {
 		sig := ed25519.Sign(signerInfo.PrivateKey, message[:])
 		if !ed25519.Verify(signerInfo.PublicKey, message[:], sig) {
-			err := fmt.Errorf("valid signature rejected")
+			err := errors.New("valid signature rejected")
 			logger.Error("ed25519.Verify", zap.Error(err))
 			return nil, "", err
 		}
 		signatures = append(signatures, hex.EncodeToString(sig))
 	}
 
-	messageWithSig := append(result[1:], signatures...)
+	var messageWithSig []string
+	messageWithSig = append(append(messageWithSig, result[1:]...), signatures...)
 	hash := hex.EncodeToString(message[:])
 
 	logger.Debug(

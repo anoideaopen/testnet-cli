@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var generateMessageCmd = &cobra.Command{
+var generateMessageCmd = &cobra.Command{ //nolint:unused
 	Use:   "generateMessage",
 	Short: "generate message for validators - for acl",
 	Args:  cobra.MinimumNArgs(2), //nolint:gomnd

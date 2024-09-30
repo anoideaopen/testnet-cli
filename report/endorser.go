@@ -7,8 +7,7 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/channel"
 )
 
-type EndorserReporter struct {
-}
+type EndorserReporter struct{}
 
 func (t EndorserReporter) Report(resp *channel.Response, timeStart time.Time, timeEnd time.Time) error {
 	fmt.Println("-------- Request transaction info:")
@@ -22,9 +21,9 @@ func (t EndorserReporter) Report(resp *channel.Response, timeStart time.Time, ti
 	for i, r := range resp.Responses {
 		fmt.Printf("\n\n- [%d] Response: \n", i)
 		fmt.Printf("Endorser %s\n", r.Endorser)
-		fmt.Printf("Status: %d\n", r.Response.Status)
-		//fmt.Printf("Message: %s\n", r.Response.Message)
-		//fmt.Printf("Payload: %s\n", string(r.Response.Payload))
+		fmt.Printf("Status: %d\n", r.Response.GetStatus())
+		// fmt.Printf("Message: %s\n", r.Response.Message)
+		// fmt.Printf("Payload: %s\n", string(r.Response.Payload))
 	}
 	return nil
 }

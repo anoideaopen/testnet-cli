@@ -62,13 +62,13 @@ func CreateSchema(db *pg.DB) error {
 }
 
 func GetRequests(db *pg.DB) []Request {
-	requestTxId := make([]string, 0)
-	err := db.Model(&Batch{}).Column("request_tx_id").Select(&requestTxId)
+	requestTxID := make([]string, 0)
+	err := db.Model(&Batch{}).Column("request_tx_id").Select(&requestTxID)
 	if err != nil {
 		panic(err)
 	}
 	requests := make([]Request, 0)
-	err = db.Model(&requests).Where("tx_id NOT IN (?)", requestTxId).Select()
+	err = db.Model(&requests).Where("tx_id NOT IN (?)", requestTxID).Select()
 	if err != nil {
 		panic(err)
 	}

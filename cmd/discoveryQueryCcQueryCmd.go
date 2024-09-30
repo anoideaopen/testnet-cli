@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var discoveryQueryCcQueryCmd = &cobra.Command{
+var discoveryQueryCcQueryCmd = &cobra.Command{ //nolint:unused
 	Use:   "discoveryQueryCcQuery",
 	Short: "discovery Query Cc Query",
 	Args:  cobra.ExactArgs(3), //nolint:gomnd
