@@ -10,7 +10,6 @@ import (
 	"github.com/golang/protobuf/proto" //nolint:staticcheck
 	"github.com/hyperledger/fabric-protos-go/peer"
 	"github.com/hyperledger/fabric-sdk-go/third_party/github.com/hyperledger/fabric/core/ledger/kvledger/txmgmt/rwsetutil"
-	"github.com/hyperledger/fabric/protoutil"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
@@ -43,7 +42,7 @@ func validateBlock(channelID string, blockID string) { //nolint:unused
 	if err != nil {
 		FatalError("Failed to WriteFile", err)
 	}
-	blk, err := protoutil.UnmarshalBlock(bytes)
+	blk, err := UnmarshalBlock(bytes)
 	if err != nil {
 		FatalError("Failed to Marshal", err)
 	}
@@ -66,13 +65,13 @@ func parseTx(envBytes []byte) { //nolint:unused
 	}
 	logger.Info("processedTransaction.ValidationCode", zap.Any("ValidationCode", processedTransaction.GetValidationCode()))
 
-	txID, err := protoutil.GetOrComputeTxIDFromEnvelope(envBytes)
+	txID, err := GetOrComputeTxIDFromEnvelope(envBytes)
 	if err != nil {
 		FatalError("error GetOrComputeTxIDFromEnvelope", err)
 	}
 	logger.Info("txID", zap.Any("txID", txID))
 
-	transaction, err := protoutil.UnmarshalTransaction(envBytes)
+	transaction, err := UnmarshalTransaction(envBytes)
 	if err != nil {
 		FatalError("error UnmarshalTransaction", err)
 	}
@@ -102,7 +101,7 @@ func rwSetByChaincodeAction(chaincodeAction *peer.ChaincodeAction) { //nolint:un
 		return
 	}
 
-	chaincodeEvents, err := protoutil.UnmarshalChaincodeEvents(chaincodeAction.GetEvents())
+	chaincodeEvents, err := UnmarshalChaincodeEvents(chaincodeAction.GetEvents())
 	if err != nil {
 		FatalError("chaincode events", err)
 	}

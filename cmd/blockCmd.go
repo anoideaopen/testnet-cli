@@ -8,7 +8,6 @@ import (
 	"github.com/anoideaopen/testnet-cli/logger"
 	"github.com/golang/protobuf/proto" //nolint:staticcheck
 	cb "github.com/hyperledger/fabric-protos-go/common"
-	"github.com/hyperledger/fabric/protoutil"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
@@ -79,24 +78,24 @@ func saveBlock(channelID string, blockID string, block *cb.Block) error {
 func printBlock(block *cb.Block) {
 	for txIndex, envBytes := range block.GetData().GetData() {
 		logger.Info("txIndex", zap.Any("txIndex", txIndex))
-		env, err := protoutil.GetEnvelopeFromBlock(envBytes)
+		env, err := GetEnvelopeFromBlock(envBytes)
 		if err != nil {
 			FatalError("GetEnvelopeFromBlock", err)
 		}
 
-		payload, err := protoutil.UnmarshalPayload(env.GetPayload())
+		payload, err := UnmarshalPayload(env.GetPayload())
 		if err != nil {
 			FatalError("UnmarshalPayload", err)
 		}
 
-		shdr, err := protoutil.UnmarshalSignatureHeader(payload.GetHeader().GetSignatureHeader())
+		shdr, err := UnmarshalSignatureHeader(payload.GetHeader().GetSignatureHeader())
 		if err != nil {
 			FatalError("UnmarshalSignatureHeader", err)
 		}
 		logger.Info("shdr.Creator")
 		logger.Info(string(shdr.GetCreator()))
 
-		serializedIdentity, err := protoutil.UnmarshalSerializedIdentity(shdr.GetCreator())
+		serializedIdentity, err := UnmarshalSerializedIdentity(shdr.GetCreator())
 		if err != nil {
 			FatalError("UnmarshalSerializedIdentity", err)
 		}
@@ -110,7 +109,7 @@ func printBlock(block *cb.Block) {
 		logger.Info("shdr.Nonce")
 		logger.Info(string(shdr.GetNonce()))
 
-		chdr, err := protoutil.UnmarshalChannelHeader(payload.GetHeader().GetChannelHeader())
+		chdr, err := UnmarshalChannelHeader(payload.GetHeader().GetChannelHeader())
 		if err != nil {
 			FatalError("UnmarshalChannelHeader", err)
 		}
