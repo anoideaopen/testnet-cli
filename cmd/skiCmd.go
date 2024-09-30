@@ -2,13 +2,12 @@ package cmd
 
 import (
 	"crypto/ecdsa"
-	"crypto/elliptic"
 	"crypto/sha256"
 	"crypto/x509"
 	"encoding/hex"
 	"encoding/pem"
 	"fmt"
-	"io/ioutil"
+	"os"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -29,7 +28,7 @@ var skiCmd = &cobra.Command{
 }
 
 func readSKI(pathToPrivateKey string) {
-	privateKeyFile, err := ioutil.ReadFile(pathToPrivateKey)
+	privateKeyFile, err := os.ReadFile(pathToPrivateKey)
 	if err != nil {
 		FatalError("read private key file", err)
 	}
@@ -49,8 +48,12 @@ func SKI(privKey *ecdsa.PrivateKey) []byte {
 	}
 
 	// Marshall the public key
-	raw := elliptic.Marshal(privKey.Curve, privKey.PublicKey.X, privKey.PublicKey.Y)
+	ecdhPk, err := privKey.ECDH()
+	if err != nil {
+		panic(err)
+	}
 
+	raw := ecdhPk.Bytes()
 	// Hash it
 	hash := sha256.New()
 	hash.Write(raw)

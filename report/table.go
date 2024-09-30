@@ -7,8 +7,7 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/channel"
 )
 
-type TableReporter struct {
-}
+type TableReporter struct{}
 
 func (t TableReporter) Report(resp *channel.Response, timeStart time.Time, timeEnd time.Time) error {
 	if resp.TxValidationCode == 0 {

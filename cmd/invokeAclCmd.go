@@ -10,9 +10,9 @@ import (
 	"go.uber.org/zap"
 )
 
-const noBatch = true
+// const noBatch = true
 
-var invokeACLCmd = &cobra.Command{
+var invokeACLCmd = &cobra.Command{ //nolint:unused
 	Use:   "invokeAcl channelID methodName [optional method arguments]",
 	Short: "invoke acl version with signature in hex - v0.8.1-0.0.2 and earlier",
 	Args:  cobra.MinimumNArgs(2), //nolint:gomnd
@@ -42,7 +42,7 @@ var invokeACLCmd = &cobra.Command{
 			logger.Info("secretKey", zap.String("secretKey", secretKey))
 			privateKey, publicKey, err := utils.GetPrivateKey(secretKey)
 			if err != nil {
-				msg := fmt.Sprintf("Failed to GetPrivateKeySK %s", secretKey)
+				msg := "Failed to GetPrivateKeySK " + secretKey
 				FatalError(msg, err)
 			}
 			signerInfo := utils.SignerInfo{}

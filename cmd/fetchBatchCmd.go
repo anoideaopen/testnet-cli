@@ -12,7 +12,7 @@ import (
 	"golang.org/x/time/rate"
 )
 
-var fetchBatchCmd = &cobra.Command{
+var fetchBatchCmd = &cobra.Command{ //nolint:unused
 	Use:   "fetchBatch",
 	Short: "fetchBatch",
 	Args:  cobra.MinimumNArgs(0), //nolint:gomnd
@@ -22,7 +22,7 @@ var fetchBatchCmd = &cobra.Command{
 			config.Postgres.PostgresPort,
 			config.Postgres.PostgresUser,
 			config.Postgres.PostgresPassword,
-			config.Postgres.PostgresDbName,
+			config.Postgres.PostgresDBName,
 		)
 		if err != nil {
 			panic(err)
@@ -51,8 +51,7 @@ var fetchBatchCmd = &cobra.Command{
 		wg.Add(numberRequest)
 
 		ctx := context.Background()
-		for i := 0; i < numberRequest; i++ {
-
+		for i := range numberRequest {
 			// Wait for the rate limiter to allow the next request
 			err := limiter.WaitN(ctx, 1)
 			if err != nil {

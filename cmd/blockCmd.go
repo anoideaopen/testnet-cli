@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"errors"
-	"io/ioutil"
+	"os"
 	"strconv"
 
 	"github.com/anoideaopen/testnet-cli/logger"
@@ -68,7 +68,7 @@ func saveBlock(channelID string, blockID string, block *cb.Block) error {
 
 	file := channelID + "_" + blockID + ".block"
 
-	err = ioutil.WriteFile(file, b, 0o600) //nolint:gomnd
+	err = os.WriteFile(file, b, 0o600) //nolint:gomnd
 	if err != nil {
 		return err
 	}
@@ -77,48 +77,48 @@ func saveBlock(channelID string, blockID string, block *cb.Block) error {
 }
 
 func printBlock(block *cb.Block) {
-	for txIndex, envBytes := range block.Data.Data {
+	for txIndex, envBytes := range block.GetData().GetData() {
 		logger.Info("txIndex", zap.Any("txIndex", txIndex))
 		env, err := protoutil.GetEnvelopeFromBlock(envBytes)
 		if err != nil {
 			FatalError("GetEnvelopeFromBlock", err)
 		}
 
-		payload, err := protoutil.UnmarshalPayload(env.Payload)
+		payload, err := protoutil.UnmarshalPayload(env.GetPayload())
 		if err != nil {
 			FatalError("UnmarshalPayload", err)
 		}
 
-		shdr, err := protoutil.UnmarshalSignatureHeader(payload.Header.SignatureHeader)
+		shdr, err := protoutil.UnmarshalSignatureHeader(payload.GetHeader().GetSignatureHeader())
 		if err != nil {
 			FatalError("UnmarshalSignatureHeader", err)
 		}
 		logger.Info("shdr.Creator")
-		logger.Info(string(shdr.Creator))
+		logger.Info(string(shdr.GetCreator()))
 
-		serializedIdentity, err := protoutil.UnmarshalSerializedIdentity(shdr.Creator)
+		serializedIdentity, err := protoutil.UnmarshalSerializedIdentity(shdr.GetCreator())
 		if err != nil {
 			FatalError("UnmarshalSerializedIdentity", err)
 		}
 
 		logger.Info("serializedIdentity.Mspid")
-		logger.Info(serializedIdentity.Mspid)
+		logger.Info(serializedIdentity.GetMspid())
 
 		logger.Info("serializedIdentity.IdBytes")
-		logger.Info(string(serializedIdentity.IdBytes))
+		logger.Info(string(serializedIdentity.GetIdBytes()))
 
 		logger.Info("shdr.Nonce")
-		logger.Info(string(shdr.Nonce))
+		logger.Info(string(shdr.GetNonce()))
 
-		chdr, err := protoutil.UnmarshalChannelHeader(payload.Header.ChannelHeader)
+		chdr, err := protoutil.UnmarshalChannelHeader(payload.GetHeader().GetChannelHeader())
 		if err != nil {
 			FatalError("UnmarshalChannelHeader", err)
 		}
 
 		logger.Info("chdr.TxId")
-		logger.Info(chdr.TxId)
+		logger.Info(chdr.GetTxId())
 
 		logger.Info("payload.Data")
-		logger.Info(string(payload.Data))
+		logger.Info(string(payload.GetData()))
 	}
 }

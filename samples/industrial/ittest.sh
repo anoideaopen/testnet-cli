@@ -20,8 +20,8 @@ echo "==========================================================================
 ./cli query ittest metadata
 #./cli query otf metadata unknown method
 
-## Инициализируем группы токенов,
-## 
+## Initialize token groups
+
 ./cli invoke ittest initialize --noBatch $itOwnerKey
 
 ./cli query ittest industrialBalanceOf $itOwnerAddress

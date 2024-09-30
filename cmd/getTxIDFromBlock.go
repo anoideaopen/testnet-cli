@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 
 	"github.com/golang/protobuf/proto" //nolint:staticcheck
 	cb "github.com/hyperledger/fabric-protos-go/common"
@@ -20,7 +20,7 @@ var getTxIDFromBlockCmd = &cobra.Command{
 			FatalError("block file path is empty", nil)
 		}
 
-		bytes, err := ioutil.ReadFile(filePath)
+		bytes, err := os.ReadFile(filePath)
 		if err != nil {
 			FatalError("failed ReadFile", err)
 		}
@@ -31,23 +31,24 @@ var getTxIDFromBlockCmd = &cobra.Command{
 			FatalError("failed Unmarshal", err)
 		}
 
-		for _, envBytes := range block.Data.Data {
+		for _, envBytes := range block.GetData().GetData() {
 			env, err := protoutil.GetEnvelopeFromBlock(envBytes)
 			if err != nil {
 				FatalError("GetEnvelopeFromBlock", err)
 			}
 
-			payload, err := protoutil.UnmarshalPayload(env.Payload)
+			payload, err := protoutil.UnmarshalPayload(env.GetPayload())
 			if err != nil {
 				FatalError("UnmarshalPayload", err)
 			}
 
-			chdr, err := protoutil.UnmarshalChannelHeader(payload.Header.ChannelHeader)
+			chdr, err := protoutil.UnmarshalChannelHeader(payload.GetHeader().GetChannelHeader())
 			if err != nil {
 				FatalError("UnmarshalChannelHeader", err)
 			}
 
-			fmt.Println(chdr.TxId)
-			fmt.Println(payload.Data)
+			fmt.Println(chdr.GetTxId())
+			fmt.Println(payload.GetData())
 		}
-	}}
+	},
+}

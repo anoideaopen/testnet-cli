@@ -50,18 +50,17 @@
 
 ## Description
 
-Утилита предназначена для выполнения следующих задач:
-- Создание криптографии/пользовательских данных специфичной для платформы testnet
-- Выполнения запросов к чейнкодам с учётом особенностей платформы testnet
-- Выполнения запросов к fabric-peer для получения данных для дебага
+The utility is designed to perform the following tasks:
+- Creating cryptography/user data specific to the testnet platform
+- Executing testnet platform specific chincode queries
+- Executing fabric-peer queries to get data for debug.
 
-Основные пользователи этой утилиты:
-- тестировщики воспроизведение сценариев ошибок на стенде заказчика
-- devops для получения информации
-- developers для отладки работы как в sandbox так и на стендах заказчика
+The main users of this utility are:
+- testers to reproduce error scenarios on the customer's testbench
+- devops to get information
+- developers for debugging both in sandbox and on customer's testbeds.
 
-Пользователь может не разбираться в особенностях платформы Hyperledger Fabric,
-но должен хорошо понимать логику работы для платформы testnet.
+The user may not be familiar with the Hyperledger Fabric platform, but should have a good understanding of the logic for the testnet platform.
 
 #hlf#tool#cli#go#
 
@@ -105,7 +104,7 @@ GOOS=windows GOARCH=386 go build -o "./output/cli-windows-386.exe" -mod=vendor -
 GOOS=windows GOARCH=amd64 go build -o "./output/cli-windows-amd64.exe" -mod=vendor -ldflags "-X main.version=load -X main.commit=aaf7b3e35597c7c43d5082e0ed5763e152431bf1 -X main.date=1690909646
 ```
 
-Результат можно посмотреть в директории output
+The result can be viewed in the output directory
 
 ```shell
 ls ./output/
@@ -119,55 +118,55 @@ docker build -t $(IMAGE_NAME):$(VERSION) .
 ------
 ## Configuration yaml file
 
-Конфигурационный файл cli обязательный.
-Пример как задается конфигурационный файл.
+The cli configuration file is mandatory.
+Example of how the configuration file is set.
 
 ```shell
 ./testnet-cli --config ./bh-dev/cli.yaml ...
 ```
 
-Пример с описанием параметров:
+An example with a description of the parameters:
 
 ```yaml
-# connection. Обязательно для заполнения. По умолчанию: не задано.
-# путь к конфигурационному файлу подключения к стенду
+# connection. Required. Default: not set.
+# path to the configuration file of connection to the stand
 connection: ./bh-dev/bh-dev-connection.yaml
 
-# organization. Опционально. По умолчанию: testnet.
-# Название организации из файла указанного в 'connection'
+# organization. Optional. Default: testnet.
+# Organization name from the file specified in 'connection'
 organization: middleeast
 
-# username. Опционально. По умолчанию: backend.
-# Название пользователя
+# username. Optional. Default: backend.
+# User name
 username: backend
 
-# waitBatch. Опционально. По умолчанию: false - не ждем событие о выполнении батча
-# определяет нужно ли ждать событие "batchExecute" после выполнения запроса.
+# waitBatch. Optional. Default: false - do not wait for the event about the execution of the batches
+# determines whether to wait for the "batchExecute" event after executing the request.
 waitBatch: true
 
-# responseType. Опционально. По умолчанию: resp.
-# Тип отражения результатов выполнения запроса
+# responseType. Optional. Default: resp.
+# Type of reflection of the results of query execution
 responseType: resp
 
-# observer. Опционально. По умолчанию не задан.
-# Указываем подключения к observer для получения информации о выполнении батча
+# observer. Optional. Not set by default.
+# Specify connections to the observer to get information about the execution of the batch
 observer:
-  # поле опционально, если не заполнено, значит не включен basic auth
+  # field is optional, if it is not filled in, it means basic auth is not enabled.
   username: "root"
-  # поле опционально, если не заполнено значит пароль пустой
+  # field is optional, if it is not filled in, the password is empty.
   password: "gBm8sPqEGLFAm8v4y7"
-  # обязательное поле, если в конфигурации объявлена секция 'observer:'
+  # mandatory field if the 'observer:' section is declared in the configuration
   url: "https://observer.dev.bh.ledger.n-t.io/api"
 ```
 ------
 
 ## Samples
 
-Образцы выполнения запросов с помощью этой утилиты размещены в директории [samples](samples)```samples``` 
+Samples of query execution using this utility are located in the directory [samples](samples)```samples``` 
 
-- [acl. примеры создания адреса пользователя на основе публичного ключа](samples/acl)
-- [swap. примеры выполнения операции swap и multiswap](samples/swap)
-- Пример выполнения запросов для токенов
+- [acl. examples of creating a user address based on a public key](samples/acl)
+- [swap. examples of swap and multiswap operations](samples/swap)
+- Example of query execution for tokens
   - [fiat](samples/fiat)
   - [hermitage](samples/hermitage)
   - [ba](samples/ba)
@@ -190,7 +189,7 @@ export LOG_LEVEL=debug
 
 ### Help
 
-Просмотр версии для определения списка поддерживаемых команд
+View the version to determine the list of supported commands
 
 Execute:
 ```shell
@@ -206,7 +205,7 @@ Return:
 
 ### Version
 
-Просмотр версии для определения списка поддерживаемых команд
+View the version to determine the list of supported commands
 
 Execute:
 ```shell
@@ -359,7 +358,7 @@ for ((i=42430;i<42446;i+=1)); do ./testnet-cli --config ./ru-dev23/cli.yaml bloc
 
 #### Response:
 
-Проверьте директорию с ```./testnet-cli``` там будет файл с блоков ```[acl_273.block]```
+Check the directory with ```./testnet-cli``` there will be a file with the blocks ```[acl_273.block]```.
 
 ### Save block from peer by transactionId
 
@@ -382,13 +381,13 @@ Args:
 
 #### Response:
 
-Проверьте директорию с ```./testnet-cli``` там будет файл с блоков ```[acl_273.block]```
+Check the directory with ```./testnet-cli``` there will be a file with the blocks ```[acl_273.block]```.
 
 ### script
 
-Запускает переданный набор комманд в json формате
+Runs the passed set of commands in json format
 
-Пример файла ./script.json
+Example ./script.json file
 
 ```json
 {
@@ -411,13 +410,13 @@ Args:
 
 ### batchExecute
 
-Выполняет query batchExecute для указанного набора txID выполняя их в одном батче
+Executes a query batchExecute for the specified set of txIDs executing them in the same batch
 
 ```shell
 ./testnet-cli --config ./internal/cli.yaml batchExecute testbagrossmt txID
 ```
 
-Пример выполнения на 1 пире для проверки таймаута:
+Example execution on 1 pir to check the timeout:
 
 ```shell
 ./testnet-cli --peers prod-org0-peer-001.internal.org0.prod.core.n-t.io \
@@ -431,8 +430,8 @@ Args:
 
 ### Query
 
-Для отправки запросов на конкретный пир/пиры нужно указать параметр --peers "url1,url2,url3"
-Через ``,`` перечислить список адресов пиров
+To send requests to a specific peer(s), you need to specify the --peers parameter "url1,url2,url3"
+Use ```,``` to list the list of peer addresses
 
 #### Request:
 
@@ -445,7 +444,7 @@ Args:
 1. [command] - query
 2. [channel] - ba02
 3. [method] - metadata
-4. [args] - далее через пробел передаем аргументы
+4. [args] - then pass the arguments through a space
 
 ```shell
 ./testnet-cli --config ./bh-dev/cli.yaml query ba02 metadata | jq
@@ -673,8 +672,8 @@ Example:
 
 ### Invoke
 
-Для отправки запросов на конкретный пир/пиры нужно указать параметр --peers "url1,url2,url3"
-Через ``,`` перечислить список адресов пиров
+To send requests to a specific peer(s), you need to specify the --peers parameter "url1,url2,url3"
+Use ```,``` to list the list of peer addresses
 
 #### Invoke with signed args
 
@@ -766,9 +765,9 @@ Invoke error: Multiple errors occurred: - Transaction processing for endorser [d
 
 #### Wait batch execute signed invoke
 
-На данный момент оформлена ошибка [подробнее](#Issues)
+At this point, a bug has been filed
 
-Опционально. По умолчанию не ожидаем событий batch execute.
+Optional. By default, do not expect batch execute events.
 
 ```yaml
 waitBatch: true
@@ -813,21 +812,21 @@ BatchValidationCode: 0
 
 ### Convert
 
-Для конвертации строки из одной кодировки в другую.
+To convert a string from one encoding to another.
 
-**Комбинации конвертаций которые поддерживаются на данный момент:**
-- из base58 в hex
-- из base58 в sum3hex
-- из base58 в base58check
-- из base58 в Sum256base58CheckEncode
-- из base58check в base58
-- из base58check в base64
-- из hex в base58
-- из hex в base58check
-- из str в base58
-- из str в hex
-- из str в hex
-- из str в base58check
+**Conversion combinations currently supported:**
+- form base58 to hex
+- form base58 to sum3hex
+- form base58 to base58check
+- form base58 to Sum256base58CheckEncode
+- form base58check to base58
+- form base58check to base64
+- form hex to base58
+- form hex to base58check
+- form str to base58
+- form str to hex
+- form str to hex
+- form str to base58check
 
 Request:
 
@@ -835,21 +834,21 @@ Request:
 ./cli convert base58 hex FmUXc1fudiUREQSpqc5pgi5MZYH6XHaAGoRSDoeB2QpT
 ./cli convert hex base58 db684c558b4e1dcfdc98b0b629bc572742361b42a5c7ac1709d68bc126cdbc64
 ./cli convert hex base58check db684c558b4e1dcfdc98b0b629bc572742361b42a5c7ac1709d68bc126cdbc64
-./cli convert str base58 строка
-./cli convert str hex строка
-./cli convert str base58check строка
+./cli convert str base58 string
+./cli convert str hex string
+./cli convert str base58check string
 ```
 
 ### Performance test
 
-Параметры для метода invoke которые можно использовать для нагрузочного тестирования.
-Параметры доступны для методов `./testnet-cli` 'invoke', 'query'
+Parameters for invoke method that can be used for load testing.
+Parameters are available for `./testnet-cli` methods `./testnet-cli` 'invoke', 'query'
 
-- `-t 50` или `--requestsPerSecond 50` указав кол-во параллельно запущенных goroutine за одну секунду
-- общее кол-во запросов
-  - `-n 1000` или `--numberRequest 1000` указать максимальное кол-во запросов
-  - `-n 0` или `--numberRequest 0` задать чтобы нагрузка выполнялась бесконечно
-- во время нагрузки не нужно ждать событий по этому параметр `waitBatch` не должен быть `true` ни в конфиге не в env ни в параметрах запроса. По умолчанию этот параметр false.
+- `-t 50` or `--requestsPerSecond 50` specifying the number of parallel goroutine runs in one second
+- total number of queries
+  - `-n 1000` or `--numberRequest 1000` specifying the maximum number of requests
+  - `-n 0` or `--numberRequest 0` set the load to run indefinitely
+- During the load it is not necessary to wait for events, so the `waitBatch` parameter should not be `true` neither in the config nor in the env nor in the request parameters. By default this parameter is false.
 
 **Request:**
 
@@ -859,7 +858,7 @@ Request:
 
 **Response:**
 
-Для удобного чтения вывода нагрузки можно сделать табличный вывод указав `-r table` или же записать информацию о нагрузки в бд postgres задав параметр `-r postgres`
+For convenient reading of the load output you can make a tabular output by specifying `-r table` or write the load information to the postgres database by specifying the `-r postgres` parameter
 
 **table report**
 
@@ -881,8 +880,7 @@ Apache-2.0
 
 ## Links
 
-* [origin](https://github.com/anoideaopen/migration-manager)
-* [Процесс обновления публичного ключа](CHANGE_PUBLIC_KEY.md)
+* [origin](https://github.com/anoideaopen/testnet-cli)
+* [The process of updating the public key](CHANGE_PUBLIC_KEY.md)
 
 ## Issues:
-- "cli не находит ошибку в event о создании батча" https://nwty.atlassian.net/browse/ATMCORE-6634

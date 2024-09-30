@@ -20,8 +20,8 @@ echo "==========================================================================
 ./cli -f connection.yaml query gf28iln060 metadata
 #./cli -f connection.yaml query otf metadata unknown method
 
-## Инициализируем группы токенов,
-## 
+## Initialize token groups
+
 #./cli -f connection.yaml invoke gf28iln060 initialize --noBatch $itOwnerKey
 
 ./cli -f connection.yaml query gf28iln060 industrialBalanceOf $itOwnerAddress

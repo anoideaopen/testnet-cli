@@ -7,8 +7,7 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/channel"
 )
 
-type TxIDReporter struct {
-}
+type TxIDReporter struct{}
 
 func (t TxIDReporter) Report(resp *channel.Response, timeStart time.Time, timeEnd time.Time) error {
 	if resp != nil {

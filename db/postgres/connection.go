@@ -16,7 +16,6 @@ func NewPostgresDB(
 	password string,
 	dbName string,
 ) (*pg.DB, error) {
-
 	logger.Info(
 		"postgres",
 		zap.String("host", host),

@@ -40,7 +40,6 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	rootCmd.PersistentFlags().StringVar(&configFilePath, "config", "", "the config file path")
-
 	rootCmd.PersistentFlags().IntVarP(&config.NumberRequest, "numberRequest", "n", 1, "number request")
 	rootCmd.PersistentFlags().IntVarP(&config.RequestsPerSecond, "requestsPerSecond", "t", 1, "requests per second")
 	rootCmd.PersistentFlags().StringVarP(&config.ChaincodeName, "chaincode", "c", "", "chaincode name on which this command should be executed")
@@ -64,7 +63,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&config.Postgres.PostgresPort, "postgresPort", "", "postgresPort")
 	rootCmd.PersistentFlags().StringVar(&config.Postgres.PostgresUser, "postgresUser", "", "postgresUser")
 	rootCmd.PersistentFlags().StringVar(&config.Postgres.PostgresPassword, "postgresPassword", "", "postgresPassword")
-	rootCmd.PersistentFlags().StringVar(&config.Postgres.PostgresDbName, "postgresDbName", "", "postgresDbName")
+	rootCmd.PersistentFlags().StringVar(&config.Postgres.PostgresDBName, "postgresDbName", "", "postgresDbName")
 
 	rootCmd.AddCommand(privkeyCmd)
 	rootCmd.AddCommand(pubkeyCmd)
@@ -80,20 +79,20 @@ func init() {
 	rootCmd.AddCommand(txCmd)
 
 	rootCmd.AddCommand(statusCmd)
-	//rootCmd.AddCommand(fetchBatchCmd)
+	// rootCmd.AddCommand(fetchBatchCmd)
 
-	//rootCmd.AddCommand(invokeACLCmd)
-	//rootCmd.AddCommand(chaincodeVersionCmd)
+	// rootCmd.AddCommand(invokeACLCmd)
+	// rootCmd.AddCommand(chaincodeVersionCmd)
 	rootCmd.AddCommand(convertCmd)
 	rootCmd.AddCommand(getTxIDFromBlockCmd)
 	rootCmd.AddCommand(batchExecuteCmd)
-	//rootCmd.AddCommand(validateBlockCmd)
-	//rootCmd.AddCommand(generateMessageCmd)
-	//rootCmd.AddCommand(sendRequestCmd)
-	//rootCmd.AddCommand(signMessageCmd)
-	//// service discovery request
-	//rootCmd.AddCommand(discoveryQueryPeerQueryCmd)
-	//rootCmd.AddCommand(discoveryQueryCcQueryCmd)
+	// rootCmd.AddCommand(validateBlockCmd)
+	// rootCmd.AddCommand(generateMessageCmd)
+	// rootCmd.AddCommand(sendRequestCmd)
+	// rootCmd.AddCommand(signMessageCmd)
+	// // service discovery request
+	// rootCmd.AddCommand(discoveryQueryPeerQueryCmd)
+	// rootCmd.AddCommand(discoveryQueryCcQueryCmd)
 }
 
 func initConfig() {

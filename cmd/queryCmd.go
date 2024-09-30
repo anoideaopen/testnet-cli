@@ -74,7 +74,7 @@ var queryCmd = &cobra.Command{
 		wg.Add(numberRequest)
 
 		ctx := context.Background()
-		for i := 0; i < numberRequest; i++ {
+		for range numberRequest {
 			// Wait for the rate limiter to allow the next request
 			err := limiter.WaitN(ctx, 1)
 			if err != nil {
@@ -120,10 +120,10 @@ var queryCmd = &cobra.Command{
 						config.Observer.ObserverVersion,
 					)
 					var batch postgres.Batch
-					//err := retryFunc(60, 2*time.Second, func() (err error) {
+					// err := retryFunc(60, 2*time.Second, func() (err error) {
 					batch, err = observer.GetBatch(txID)
-					//return err
-					//})
+					// return err
+					// })
 					if err != nil {
 						logger.GetLogger().Error("get batch from observer", zap.Error(err))
 						return

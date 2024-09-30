@@ -31,5 +31,5 @@ type PostgresConfig struct {
 	PostgresPort     string `mapstructure:"port,omitempty"`
 	PostgresUser     string `mapstructure:"user,omitempty"`
 	PostgresPassword string `mapstructure:"password,omitempty"`
-	PostgresDbName   string `mapstructure:"dbName,omitempty"`
+	PostgresDBName   string `mapstructure:"dbName,omitempty"`
 }

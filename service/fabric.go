@@ -12,7 +12,7 @@ import (
 	"github.com/anoideaopen/cartridge/manager"
 	"github.com/anoideaopen/foundation/proto"
 	"github.com/anoideaopen/testnet-cli/logger"
-	pb "github.com/golang/protobuf/proto"
+	pb "github.com/golang/protobuf/proto" //nolint:staticcheck
 	"github.com/hyperledger/fabric-protos-go/common"
 	"github.com/hyperledger/fabric-protos-go/peer"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/channel"
@@ -28,13 +28,10 @@ import (
 
 const (
 	BatchExecuteEvent          = "batchExecute"
-	KeyEvent                   = "key"
-	MultiSwapKeyEvent          = "multi_swap_key"
 	defaultTimeoutEventSeconds = 30
 )
 
 type HLFClient struct {
-	resMgmt                 *resmgmt.Client
 	sdk                     *fabsdk.FabricSDK
 	channels                map[string]*ChannelConnection
 	NotifierChaincodeEvents map[string]<-chan *fab.CCEvent
@@ -54,7 +51,7 @@ func (hlf *HLFClient) AddFabsdk(configProvider core2.ConfigProvider, opts ...fab
 	if err != nil {
 		msg := "failed to create new SDK"
 		logger.Error(msg, zap.Error(err))
-		return fmt.Errorf("%s: %v", msg, err)
+		return fmt.Errorf("%s: %w", msg, err)
 	}
 
 	hlf.sdk = sdk
@@ -62,13 +59,13 @@ func (hlf *HLFClient) AddFabsdk(configProvider core2.ConfigProvider, opts ...fab
 }
 
 func NewHLFClientFile(connectionConfigPath string, username string, organization string) (*HLFClient, error) {
-	hlfClient, err := newHLFClient()
-	if err != nil {
-		logger.Error("Failed to create new hlf client", zap.Error(err))
-		return nil, err
-	}
+	hlfClient := newHLFClient()
 
 	configProvider, _, err := hlfClient.AddConnectionConfig(connectionConfigPath)
+	if err != nil {
+		logger.Error("Failed to AddConnectionConfig", zap.Error(err))
+		return nil, err
+	}
 
 	err = hlfClient.AddFabsdk(configProvider)
 	if err != nil {
@@ -89,7 +86,7 @@ func NewHLFClientFile(connectionConfigPath string, username string, organization
 type VaultConfig struct {
 	Token string `mapstructure:"token,omitempty"`
 	Path  string `mapstructure:"path,omitempty"`
-	//CAcert       string `mapstructure:"ca_cert,omitempty"`
+	// CAcert       string `mapstructure:"ca_cert,omitempty"`
 	Address      string `mapstructure:"address,omitempty"`
 	UserCertName string `mapstructure:"user_cert_name,omitempty"`
 	UserOrgMspID string `mapstructure:"user_org_msp_id,omitempty"`
@@ -114,13 +111,13 @@ func NewHLFClient(connectionConfigPath string, username string, organization str
 }
 
 func NewHLFClientVault(connectionConfigPath string, organization string, vaultConfig *VaultConfig) (*HLFClient, error) {
-	hlfClient, err := newHLFClient()
-	if err != nil {
-		logger.Error("Failed to create new hlf client", zap.Error(err))
-		return nil, err
-	}
+	hlfClient := newHLFClient()
 
 	configProvider, backends, err := hlfClient.AddConnectionConfig(connectionConfigPath)
+	if err != nil {
+		logger.Error("Failed to AddConnectionConfig", zap.Error(err))
+		return nil, err
+	}
 
 	vaultManager, err := manager.NewVaultManager(
 		vaultConfig.UserOrgMspID,
@@ -161,19 +158,19 @@ func NewHLFClientVault(connectionConfigPath string, organization string, vaultCo
 	return hlfClient, nil
 }
 
-func newHLFClient() (*HLFClient, error) {
+func newHLFClient() *HLFClient {
 	hlf := &HLFClient{
 		channels:                make(map[string]*ChannelConnection),
 		NotifierChaincodeEvents: map[string]<-chan *fab.CCEvent{},
 	}
 
-	return hlf, nil
+	return hlf
 }
 
-func (hlf *HLFClient) AddChannel(channelID string, events ...string) error {
+func (hlf *HLFClient) AddChannel(channelID string) error {
 	channelConnection, err := hlf.GetChannelConnection(channelID)
 	if err != nil {
-		return fmt.Errorf("failed to GetChannelConnection: %s", err)
+		return fmt.Errorf("failed to GetChannelConnection: %w", err)
 	}
 	if channelConnection == nil {
 		return errors.New("channelConnection can't be nil")
@@ -190,7 +187,7 @@ func (hlf *HLFClient) AddAfterInvokeHandler(afterInvokeHandler HlfAfterInvokeHan
 }
 
 func (hlf *HLFClient) createChannelClient(channelID string, options ...fabsdk.ContextOption) (*channel.Client, contextApi.ChannelProvider, error) {
-	//prepare channel client context using client context
+	// prepare channel client context using client context
 	clientChannelContext := hlf.sdk.ChannelContext(channelID, options...)
 	// Channel client is used to query and execute transactions (Org1 is default org)
 	client, err := channel.New(clientChannelContext)
@@ -325,13 +322,13 @@ func (hlf *HLFClient) Invoke(waitBatch bool, channelID string, chaincodeName str
 		options,
 	)
 
-	if waitBatch {
+	if waitBatch { //nolint:nestif
 		// start event start search batch event
 		select {
 		case ccEvent := <-notifier:
 			logger.GetLogger().Info("- found cc event:")
 			logger.GetLogger().Info("ccEvent.TxID: %s " + ccEvent.TxID)
-			//logger.GetLogger().Info("ccEvent.BlockNumber: %s " + s(ccEvent.BlockNumber))
+			// logger.GetLogger().Info("ccEvent.BlockNumber: %s " + s(ccEvent.BlockNumber))
 			logger.GetLogger().Info("ccEvent.ChaincodeID: %s " + ccEvent.ChaincodeID)
 			logger.GetLogger().Info("ccEvent.EventName: %s " + ccEvent.EventName)
 			logger.GetLogger().Info("ccEvent.SourceURL: %s " + ccEvent.SourceURL)
@@ -346,12 +343,12 @@ func (hlf *HLFClient) Invoke(waitBatch bool, channelID string, chaincodeName str
 					return nil, err
 				}
 
-				for _, event := range batchEvent.Events {
-					if event.Error != nil {
+				for _, event := range batchEvent.GetEvents() {
+					if event.GetError() != nil {
 						logger.Error("err",
-							zap.String("event.Id", hex.EncodeToString(event.Id)),
-							zap.String("event.Error.Error", event.Error.Error),
-							zap.Int32("event.Error.Code", event.Error.Code),
+							zap.String("event.Id", hex.EncodeToString(event.GetId())),
+							zap.String("event.Error.Error", event.GetError().GetError()),
+							zap.Int32("event.Error.Code", event.GetError().GetCode()),
 							zap.Error(err),
 						)
 
@@ -383,10 +380,8 @@ type HlfBeforeInvokeHandler func(channelID string, chaincodeName string, methodN
 func (hlf *HLFClient) RequestChaincode(
 	chaincodeName string, methodName string, methodArgs []string,
 	requestFunc func(channel.Request, ...channel.RequestOption) (channel.Response, error),
-	options []channel.RequestOption) (*channel.Response, error) {
-
-	var err error
-
+	options []channel.RequestOption,
+) (*channel.Response, error) {
 	logger.Debug("chaincodeName")
 	logger.Debug(fmt.Sprintf("%v\n", chaincodeName))
 	logger.Debug("methodName")
@@ -423,7 +418,7 @@ func (hlf *HLFClient) GetCCEventNotifier(client *channel.Client, chaincodeName s
 	notifier := hlf.NotifierChaincodeEvents[key]
 	if notifier == nil {
 		var err error
-		//var reg fab.Registration
+		// var reg fab.Registration
 
 		// Register chaincode event (pass in channel which receives event details when the event is complete)
 		_, notifier, err = client.RegisterChaincodeEvent(chaincodeName, event)
@@ -436,7 +431,7 @@ func (hlf *HLFClient) GetCCEventNotifier(client *channel.Client, chaincodeName s
 			return nil, err
 		}
 
-		//defer client.UnregisterChaincodeEvent(reg)
+		// defer client.UnregisterChaincodeEvent(reg)
 
 		hlf.NotifierChaincodeEvents[key] = notifier
 	}
@@ -452,19 +447,17 @@ func (hlf *HLFClient) SignArgs(channelID string, chaincodeName string, methodNam
 	return signedMessage, nil
 }
 
-func (hlf *HLFClient) QueryBlockByTxID(channelID string, transactionId string, peer string) (*common.Block, error) {
+func (hlf *HLFClient) QueryBlockByTxID(channelID string, transactionID string, peer string) (*common.Block, error) {
 	channelConnection, err := hlf.GetChannelConnection(channelID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to GetChannelConnection: %s", err)
+		return nil, fmt.Errorf("failed to GetChannelConnection: %w", err)
 	}
 	ledgerClient, err := ledger.New(channelConnection.ChannelProvider)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create new ledger client: %s", err)
+		return nil, fmt.Errorf("failed to create new ledger client: %w", err)
 	}
 
-	block, err := ledgerClient.QueryBlockByTxID(fab.TransactionID(transactionId), ledger.WithTargetEndpoints(peer))
-
-	return block, nil
+	return ledgerClient.QueryBlockByTxID(fab.TransactionID(transactionID), ledger.WithTargetEndpoints(peer))
 }
 
 // ChaincodeVersion - only for admin user, get version for chaincode, firstly try to get version for 1.4, secondly try to get for 2.3 lifecycle
@@ -495,8 +488,8 @@ func (hlf *HLFClient) ChaincodeVersion14(client *resmgmt.Client, chaincode strin
 		return "", err
 	}
 
-	for _, a := range chaincodeQueryResponse.Chaincodes {
-		if a.Name == chaincode {
+	for _, a := range chaincodeQueryResponse.GetChaincodes() {
+		if a.GetName() == chaincode {
 			return a.GetVersion(), nil
 		}
 	}
@@ -525,9 +518,12 @@ func (hlf *HLFClient) ChaincodeVersion23Lifecycle(client *resmgmt.Client, chainc
 func (hlf *HLFClient) GetPeerInfo(channelID string, peer string) (*fab.BlockchainInfoResponse, error) {
 	channelConnection, err := hlf.GetChannelConnection(channelID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to GetChannelConnection: %s", err)
+		return nil, fmt.Errorf("failed to GetChannelConnection: %w", err)
 	}
 	ledgerClient, err := ledger.New(channelConnection.ChannelProvider)
+	if err != nil {
+		return nil, err
+	}
 	blockchainInfoResponse, err := ledgerClient.QueryInfo(ledger.WithTargetEndpoints(peer))
 	if err != nil {
 		return nil, err
@@ -540,9 +536,12 @@ func (hlf *HLFClient) GetPeerInfo(channelID string, peer string) (*fab.Blockchai
 func (hlf *HLFClient) GetTransactionByID(channelID string, transactionID string, peer string) (*peer.ProcessedTransaction, error) {
 	channelConnection, err := hlf.GetChannelConnection(channelID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to GetChannelConnection: %s", err)
+		return nil, fmt.Errorf("failed to GetChannelConnection: %w", err)
 	}
 	ledgerClient, err := ledger.New(channelConnection.ChannelProvider)
+	if err != nil {
+		return nil, err
+	}
 	processedTransaction, err := ledgerClient.QueryTransaction(fab.TransactionID(transactionID), ledger.WithTargetEndpoints(peer))
 	if err != nil {
 		return nil, err
@@ -554,18 +553,16 @@ func (hlf *HLFClient) GetTransactionByID(channelID string, transactionID string,
 func (hlf *HLFClient) QueryBlock(channelID string, blockID string, endpoints string) (*common.Block, error) {
 	channelConnection, err := hlf.GetChannelConnection(channelID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to GetChannelConnection: %s", err)
+		return nil, fmt.Errorf("failed to GetChannelConnection: %w", err)
 	}
 	ledgerClient, err := ledger.New(channelConnection.ChannelProvider)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create new ledger client: %s", err)
+		return nil, fmt.Errorf("failed to create new ledger client: %w", err)
 	}
 
 	blockIDUint, err := strconv.ParseUint(blockID, 10, 64)
 	if err != nil {
-		return nil, fmt.Errorf("Parse blockID: %s", err)
+		return nil, fmt.Errorf("parse blockID: %w", err)
 	}
-	block, err := ledgerClient.QueryBlock(blockIDUint, ledger.WithTargetEndpoints(endpoints))
-
-	return block, nil
+	return ledgerClient.QueryBlock(blockIDUint, ledger.WithTargetEndpoints(endpoints))
 }

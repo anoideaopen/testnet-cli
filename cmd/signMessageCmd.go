@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 
@@ -11,19 +10,19 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var signMessageCmd = &cobra.Command{
+var signMessageCmd = &cobra.Command{ //nolint:unused
 	Use:   "signMessage",
 	Short: "sign message by validator - for acl",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		data, err := ioutil.ReadFile("message.txt")
+		data, err := os.ReadFile("message.txt")
 		if err != nil {
 			FatalError("message.txt", err)
 		}
 
 		privateKey, publicKey, err := utils.GetPrivateKey(config.SecretKey)
 		if err != nil {
-			msg := fmt.Sprintf("Failed to GetPrivateKeySK %s", config.SecretKey)
+			msg := "Failed to GetPrivateKeySK " + config.SecretKey
 			FatalError(msg, err)
 		}
 		signerInfo := utils.SignerInfo{}

@@ -75,7 +75,7 @@ export validatorPublicKeys="A4JdE9iZRzU9NEiVDNxYKKWymHeBxHR7mA8AetFrg8m4,\
 
 
 
-# создать мультисиг подпись
+# create a multisig signature
 
 ./cli generateMessage acl addMultisig $validatorPublicKeys 2
 ./cli -s 3aDebSkgXq37VPrzThboaV8oMMbYXrRAt7hnGrod4PNMnGfXjh14TY7cQs8eVT46C4RK4ZyNKLrBmyD5CYZiFmkr signMessage

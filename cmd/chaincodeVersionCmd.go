@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var chaincodeVersionCmd = &cobra.Command{
+var chaincodeVersionCmd = &cobra.Command{ //nolint:unused
 	Use:   "v channelID",
 	Short: "v - version chaincode",
 	Args:  cobra.ExactArgs(2), //nolint:gomnd
