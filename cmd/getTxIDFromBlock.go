@@ -6,7 +6,6 @@ import (
 
 	"github.com/golang/protobuf/proto" //nolint:staticcheck
 	cb "github.com/hyperledger/fabric-protos-go/common"
-	"github.com/hyperledger/fabric/protoutil"
 	"github.com/spf13/cobra"
 )
 
@@ -32,17 +31,17 @@ var getTxIDFromBlockCmd = &cobra.Command{
 		}
 
 		for _, envBytes := range block.GetData().GetData() {
-			env, err := protoutil.GetEnvelopeFromBlock(envBytes)
+			env, err := GetEnvelopeFromBlock(envBytes)
 			if err != nil {
 				FatalError("GetEnvelopeFromBlock", err)
 			}
 
-			payload, err := protoutil.UnmarshalPayload(env.GetPayload())
+			payload, err := UnmarshalPayload(env.GetPayload())
 			if err != nil {
 				FatalError("UnmarshalPayload", err)
 			}
 
-			chdr, err := protoutil.UnmarshalChannelHeader(payload.GetHeader().GetChannelHeader())
+			chdr, err := UnmarshalChannelHeader(payload.GetHeader().GetChannelHeader())
 			if err != nil {
 				FatalError("UnmarshalChannelHeader", err)
 			}

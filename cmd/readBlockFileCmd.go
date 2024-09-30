@@ -8,7 +8,6 @@ package cmd
 //	"github.com/golang/protobuf/proto"
 //	cb "github.com/hyperledger/fabric-protos-go/common"
 //	"github.com/spf13/cobra"
-//
 // )
 //
 // var (
@@ -131,15 +130,15 @@ package cmd
 //		//var env *cb.Envelope
 //		//var payload *cb.Payload
 //		//var err error
-//		//if env, err = protoutil.GetEnvelopeFromBlock(envBytes); err == nil {
-//		//	if payload, err = protoutil.UnmarshalPayload(env.Payload); err == nil {
-//		//		shdr, err := protoutil.UnmarshalSignatureHeader(payload.Header.SignatureHeader)
+//		//if env, err = GetEnvelopeFromBlock(envBytes); err == nil {
+//		//	if payload, err = UnmarshalPayload(env.Payload); err == nil {
+//		//		shdr, err := UnmarshalSignatureHeader(payload.Header.SignatureHeader)
 //		//		if err != nil {
 //		//			FatalError("UnmarshalSignatureHeader", err)
 //		//		}
 //		//		logger.Info("shdr.Creator")
 //		//		logger.Info(string(shdr.Creator))
-//		//		serializedIdentity, err := protoutil.UnmarshalSerializedIdentity(shdr.Creator)
+//		//		serializedIdentity, err := UnmarshalSerializedIdentity(shdr.Creator)
 //		//		if err != nil {
 //		//			FatalError("UnmarshalSerializedIdentity", err)
 //		//		}
