@@ -9,6 +9,8 @@ ARG TARGETARCH
 ARG TARGETOS
 ARG GO_VER
 ARG APP_VER=unknown
+ARG COMMIT=unknown
+ARG BUILD_TIME=unknown
 
 RUN apt update && apt install -y \
     git \
@@ -21,7 +23,7 @@ ENV PATH="/usr/local/go/bin:$PATH"
 
 ADD . .
 
-RUN CGO_ENABLED=0 go build -v -ldflags="-X 'main.AppInfoVer=$APP_VER'" -o /go/bin/app
+RUN CGO_ENABLED=0 go build -v -ldflags="-X 'main.version=$APP_VER' -X 'main.commit=$COMMIT' -X 'main.date=$BUILD_TIME'" -o /go/bin/cli
 
 ###############################################################################
 # Runtime image
@@ -39,7 +41,7 @@ RUN echo 'hosts: files dns' > /etc/nsswitch.conf
 
 ENV APP_VER=${APP_VER}
 
-COPY    --chown=65534:65534 --from=builder /go/bin/app /
+COPY    --chown=65534:65534 --from=builder /go/bin/cli /
 USER 65534
 
-ENTRYPOINT [ "/app" ]
+ENTRYPOINT [ "/cli" ]
