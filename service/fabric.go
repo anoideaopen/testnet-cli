@@ -1,7 +1,6 @@
 package service
 
 import (
-	"crypto/ed25519"
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -10,6 +9,7 @@ import (
 
 	"github.com/anoideaopen/cartridge"
 	"github.com/anoideaopen/cartridge/manager"
+	"github.com/anoideaopen/foundation/keys"
 	"github.com/anoideaopen/foundation/proto"
 	"github.com/anoideaopen/testnet-cli/logger"
 	pb "github.com/golang/protobuf/proto" //nolint:staticcheck
@@ -241,14 +241,14 @@ func (hlf *HLFClient) Query(channelID string, chaincodeName string, methodName s
 // methodName string - chaincode method name for invoke
 // noBatch bool - if wait batchTransaction set 'true'
 // peers string - peer0.testnet
-func (hlf *HLFClient) InvokeWithSecretKey(waitBatch bool, channelID string, chaincodeName string, methodName string, methodArgs []string, secretKey string, requestOptions ...channel.RequestOption) (*channel.Response, error) {
+func (hlf *HLFClient) InvokeWithSecretKey(waitBatch bool, channelID string, chaincodeName string, methodName string, methodArgs []string, secretKey string, keyType proto.KeyType, requestOptions ...channel.RequestOption) (*channel.Response, error) {
 	if len(secretKey) != 0 {
-		privateKey, publicKey, err := GetPrivateKey(secretKey)
+		k, err := GetKeys(secretKey, keyType)
 		if err != nil {
 			logger.Error("failed getPrivateKey", zap.Error(err))
 			return nil, err
 		}
-		methodArgs, err = hlf.SignArgs(channelID, chaincodeName, methodName, methodArgs, privateKey, publicKey)
+		methodArgs, err = hlf.SignArgs(channelID, chaincodeName, methodName, methodArgs, k)
 		if err != nil {
 			logger.Error("failed signArgs", zap.Error(err))
 			return nil, err
@@ -267,15 +267,8 @@ func (hlf *HLFClient) InvokeWithSecretKey(waitBatch bool, channelID string, chai
 // methodArgs []string -
 // noBatch bool - if wait batchTransaction set 'true'
 // peers string - peer0.testnet
-func (hlf *HLFClient) InvokeWithPublicAndPrivateKey(waitBatch bool, privateKey ed25519.PrivateKey, publicKey ed25519.PublicKey, channelID string, chaincodeName string, methodName string, methodArgs []string, requestOptions ...channel.RequestOption) (*channel.Response, error) {
-	if len(privateKey) == 0 {
-		return nil, errors.New("privateKey can't be empty")
-	}
-	if len(publicKey) == 0 {
-		return nil, errors.New("publicKey can't be empty")
-	}
-
-	methodArgs, err := hlf.SignArgs(channelID, chaincodeName, methodName, methodArgs, privateKey, publicKey)
+func (hlf *HLFClient) InvokeWithPublicAndPrivateKey(waitBatch bool, k *keys.Keys, channelID string, chaincodeName string, methodName string, methodArgs []string, requestOptions ...channel.RequestOption) (*channel.Response, error) {
+	methodArgs, err := hlf.SignArgs(channelID, chaincodeName, methodName, methodArgs, k)
 	if err != nil {
 		logger.Error("failed signArgs", zap.Error(err))
 		return nil, err
@@ -439,8 +432,8 @@ func (hlf *HLFClient) GetCCEventNotifier(client *channel.Client, chaincodeName s
 	return notifier, nil
 }
 
-func (hlf *HLFClient) SignArgs(channelID string, chaincodeName string, methodName string, methodArgs []string, privateKey ed25519.PrivateKey, publicKey ed25519.PublicKey) ([]string, error) {
-	signedMessage, _, err := Sign(privateKey, publicKey, channelID, chaincodeName, methodName, methodArgs)
+func (hlf *HLFClient) SignArgs(channelID string, chaincodeName string, methodName string, methodArgs []string, keys *keys.Keys) ([]string, error) {
+	signedMessage, _, err := Sign(keys, channelID, chaincodeName, methodName, methodArgs)
 	if err != nil {
 		return nil, err
 	}

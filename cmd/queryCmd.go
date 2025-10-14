@@ -2,17 +2,18 @@ package cmd
 
 import (
 	"context"
-	"crypto/ed25519"
 	"fmt"
 	"math"
 	"sync"
 	"time"
 
+	"github.com/anoideaopen/foundation/keys"
+	"github.com/anoideaopen/foundation/proto"
 	"github.com/anoideaopen/testnet-cli/db/postgres"
 	"github.com/anoideaopen/testnet-cli/logger"
 	"github.com/anoideaopen/testnet-cli/observer"
 	"github.com/anoideaopen/testnet-cli/report"
-	"github.com/anoideaopen/testnet-cli/utils"
+	"github.com/anoideaopen/testnet-cli/service"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	"golang.org/x/time/rate"
@@ -41,21 +42,13 @@ var queryCmd = &cobra.Command{
 		requestOptions := prepareRequestOptions()
 
 		var err error
-		var privateKey ed25519.PrivateKey
-		var publicKey ed25519.PublicKey
+		var keys *keys.Keys
+		keyType := proto.KeyType(config.KeyType)
+
 		if config.SecretKey != "" {
-			privateKey, publicKey, err = utils.GetPrivateKey(config.SecretKey)
+			keys, err = service.GetKeys(config.SecretKey, keyType)
 			if err != nil {
 				logger.Error("failed getPrivateKey", zap.Error(err))
-				return
-			}
-
-			if len(privateKey) == 0 {
-				logger.Error("privateKey can't be empty")
-				return
-			}
-			if len(publicKey) == 0 {
-				logger.Error("publicKey can't be empty")
 				return
 			}
 		}
@@ -86,7 +79,7 @@ var queryCmd = &cobra.Command{
 
 				var reqArgs []string
 				if config.SecretKey != "" {
-					reqArgs, err = HlfClient.SignArgs(channelID, config.ChaincodeName, methodName, methodArgs, privateKey, publicKey)
+					reqArgs, err = HlfClient.SignArgs(channelID, config.ChaincodeName, methodName, methodArgs, keys)
 					if err != nil {
 						logger.Error("failed signArgs", zap.Error(err))
 						return

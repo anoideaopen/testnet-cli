@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"context"
-	"crypto/ed25519"
 	"encoding/json"
 	"fmt"
 	"math"
@@ -10,11 +9,13 @@ import (
 	"sync"
 	"time"
 
+	"github.com/anoideaopen/foundation/keys"
+	"github.com/anoideaopen/foundation/proto"
 	"github.com/anoideaopen/testnet-cli/db/postgres"
 	"github.com/anoideaopen/testnet-cli/logger"
 	"github.com/anoideaopen/testnet-cli/observer"
 	"github.com/anoideaopen/testnet-cli/report"
-	"github.com/anoideaopen/testnet-cli/utils"
+	"github.com/anoideaopen/testnet-cli/service"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	"golang.org/x/time/rate"
@@ -75,23 +76,14 @@ func execCommand(command Command) { //nolint:gocognit
 	requestOptions := prepareRequestOptions()
 
 	var (
-		err        error
-		privateKey ed25519.PrivateKey
-		publicKey  ed25519.PublicKey
+		err error
+		k   *keys.Keys
 	)
 	if command.SignerPrivateKey != "" {
-		privateKey, publicKey, err = utils.GetPrivateKey(command.SignerPrivateKey)
+		keyType := proto.KeyType(config.KeyType)
+		k, err = service.GetKeys(command.SignerPrivateKey, keyType)
 		if err != nil {
 			logger.Error("failed getPrivateKey", zap.Error(err))
-			return
-		}
-
-		if len(privateKey) == 0 {
-			logger.Error("privateKey can't be empty")
-			return
-		}
-		if len(publicKey) == 0 {
-			logger.Error("publicKey can't be empty")
 			return
 		}
 	}
@@ -119,7 +111,7 @@ func execCommand(command Command) { //nolint:gocognit
 
 			var reqArgs []string
 			if command.SignerPrivateKey != "" {
-				reqArgs, err = HlfClient.SignArgs(command.Channel, command.Chaincode, command.Method, command.Args, privateKey, publicKey)
+				reqArgs, err = HlfClient.SignArgs(command.Channel, command.Chaincode, command.Method, command.Args, k)
 				if err != nil {
 					logger.Error("failed signArgs", zap.Error(err))
 					return

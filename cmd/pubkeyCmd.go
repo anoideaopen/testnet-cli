@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/anoideaopen/foundation/proto"
 	"github.com/anoideaopen/testnet-cli/logger"
-	"github.com/anoideaopen/testnet-cli/utils"
+	"github.com/anoideaopen/testnet-cli/service"
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -32,11 +33,14 @@ var pubkeyCmd = &cobra.Command{
 		if secretKey == "" && len(args) == 1 {
 			secretKey = args[0]
 		}
-		publicKey, err := utils.GetPublicKey(secretKey)
+
+		keyType := proto.KeyType(config.KeyType)
+		publicKey, err := service.GetPublicKey(config.SecretKey, keyType)
 		if err != nil {
 			logger.Error("getPublicKey", zap.Error(err))
 			return
 		}
+
 		fmt.Println(publicKey)
 	},
 }

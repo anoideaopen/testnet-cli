@@ -3,8 +3,9 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/anoideaopen/foundation/proto"
 	"github.com/anoideaopen/testnet-cli/logger"
-	"github.com/anoideaopen/testnet-cli/utils"
+	"github.com/anoideaopen/testnet-cli/service"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
@@ -19,6 +20,8 @@ var privkeyCmd = &cobra.Command{
 			isHex = true
 		}
 
+		keyType := proto.KeyType(config.KeyType)
+
 		if len(config.PrivateKeyFilePath) != 0 {
 			privateKey, err := GetPrivateKeyByFile(config.PrivateKeyFilePath)
 			if err != nil {
@@ -27,25 +30,31 @@ var privkeyCmd = &cobra.Command{
 			}
 
 			if isHex {
-				privateKeyHex := utils.ConvertPrivateKeyToHex(privateKey)
+				privateKeyHex := service.BytesToHex(privateKey)
 				fmt.Println(privateKeyHex)
 			} else {
-				privateKeyBase58Check := utils.ConvertPrivateKeyToBase58Check(privateKey)
+				privateKeyBase58Check := service.ConvertPrivateKeyToBase58CheckFromBytes(privateKey)
 				fmt.Println(privateKeyBase58Check)
 			}
 			return
 		}
 
-		_, privateKey, err := utils.GeneratePrivateAndPublicKey()
+		keys, err := service.GeneratePrivateAndPublicKey(keyType)
 		if err != nil {
 			logger.Error("generatePrivateKey", zap.Error(err))
 			return
 		}
 		if isHex {
-			privateKeyHex := utils.ConvertPrivateKeyToHex(privateKey)
+			privateKeyHex, err := service.ConvertPrivateKeyToHex(keys)
+			if err != nil {
+				logger.Error("ConvertPrivateKeyToHex", zap.Error(err))
+			}
 			fmt.Println(privateKeyHex)
 		} else {
-			privateKeyBase58Check := utils.ConvertPrivateKeyToBase58Check(privateKey)
+			privateKeyBase58Check, err := service.ConvertPrivateKeyToBase58Check(keys)
+			if err != nil {
+				logger.Error("ConvertPrivateKeyToBase58Check", zap.Error(err))
+			}
 			fmt.Println(privateKeyBase58Check)
 		}
 	},

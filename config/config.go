@@ -4,6 +4,7 @@ type ApplicationConfig struct {
 	NumberRequest     int    `mapstructure:"numberRequest,omitempty"`
 	RequestsPerSecond int    `mapstructure:"requestsPerSecond,omitempty"`
 	ChaincodeName     string `mapstructure:"chaincodeName,omitempty"`
+	KeyType           int    `mapstructure:"keyType,omitempty"` // 0=ed25519, 1=secp256k1, 2=gost
 	// key for sign transaction arguments in hyperledger
 	SecretKey          string `mapstructure:"secretKey,omitempty"`
 	PrivateKeyFilePath string `mapstructure:"privateKeyFilePath,omitempty"`

@@ -1,11 +1,9 @@
 package service
 
 import (
-	"crypto/ed25519"
+	"encoding/hex"
 	"strconv"
 	"time"
-
-	"github.com/btcsuite/btcutil/base58"
 )
 
 func AsBytes(args []string) [][]byte {
@@ -24,21 +22,9 @@ func GetNonce() string {
 	return strconv.FormatInt(NowMillisecond(), 10)
 }
 
-// ConvertPrivateKeyToBase58Check - use privateKey with standard encoded type - Base58Check
-func ConvertPrivateKeyToBase58Check(privateKey ed25519.PrivateKey) string {
-	hash := []byte(privateKey)
-	encoded := base58.CheckEncode(hash[1:], hash[0])
-	return encoded
-}
-
-// ConvertPublicKeyToBase58 - use publicKey with standard encoded type - Base58
-func ConvertPublicKeyToBase58(publicKey ed25519.PublicKey) string {
-	encoded := base58.Encode(publicKey)
-	return encoded
-}
-
-// ConvertSignatureToBase58 - use signature with standard encoded type - Base58
-func ConvertSignatureToBase58(publicKey []byte) string {
-	encoded := base58.Encode(publicKey)
-	return encoded
+func BytesToHex(b []byte) string {
+	if len(b) == 0 {
+		return ""
+	}
+	return hex.EncodeToString(b)
 }
