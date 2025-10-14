@@ -3,10 +3,9 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/anoideaopen/testnet-cli/service"
-
 	"github.com/anoideaopen/foundation/proto"
 	"github.com/anoideaopen/testnet-cli/logger"
+	"github.com/anoideaopen/testnet-cli/service"
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"

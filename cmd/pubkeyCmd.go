@@ -35,7 +35,7 @@ var pubkeyCmd = &cobra.Command{
 		}
 
 		keyType := proto.KeyType(config.KeyType)
-		publicKey, err := service.GetPublicKey(config.SecretKey, keyType)
+		publicKey, err := service.GetPublicKey(secretKey, keyType)
 		if err != nil {
 			logger.Error("getPublicKey", zap.Error(err))
 			return

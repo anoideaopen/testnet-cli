@@ -15,10 +15,7 @@ var privkeyCmd = &cobra.Command{
 	Short: "generate private key (private key -> base58.CheckEncode)",
 	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		isHex := false
-		if len(args) == 1 && args[0] == "hex" {
-			isHex = true
-		}
+		isHex := len(args) == 1 && args[0] == "hex"
 
 		keyType := proto.KeyType(config.KeyType)
 

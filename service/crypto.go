@@ -45,7 +45,7 @@ func Sign(k *keys.Keys, channel string, chaincode string, methodName string, arg
 
 	var messageWithSig []string
 	messageWithSig = append(append(messageWithSig, result[1:]...), base58.Encode(signature))
-	hash := hex.EncodeToString(message[:])
+	hash := hex.EncodeToString(message)
 
 	logger.Debug(
 		"Sign result",
@@ -87,7 +87,7 @@ func SignACL(signers []*keys.Keys, methodName string, address string, reason str
 
 	var messageWithSig []string
 	messageWithSig = append(append(messageWithSig, result[1:]...), signatures...)
-	hash := hex.EncodeToString(message[:])
+	hash := hex.EncodeToString(message)
 
 	logger.Debug(
 		"Sign result",
@@ -106,7 +106,6 @@ func SignMessage(k *keys.Keys, keyType proto.KeyType, result []string) ([]byte, 
 
 	// Подписываем сообщение в зависимости от типа ключа
 	message, signature, err := keys.SignMessageByKeyType(keyType, k, m)
-
 	if err != nil {
 		logger.Error("SignMessageByKeyType", zap.Error(err))
 		return nil, message, err
@@ -305,10 +304,9 @@ func ConvertPublicKeyToBase58(k *keys.Keys) (string, error) {
 
 	case proto.KeyType_gost:
 		// TODO: реализовать для GOST позже
-		return "", fmt.Errorf("GOST key type not yet implemented")
-
+		return "", errors.New("GOST key type not yet implemented")
 	default:
-		return "", fmt.Errorf("unsupported key type: %v", k.KeyType)
+		return "", errors.New("unsupported key type: " + k.KeyType.String())
 	}
 }
 
@@ -363,6 +361,9 @@ func GetKeys(secretKey string, keyType proto.KeyType) (*keys.Keys, error) {
 			privateKey, publicKey, err = GetPrivateKeySKFromHex(secretKey)
 			if err != nil {
 				privateKey, publicKey, err = GetPrivateKeySKFromBase58(secretKey)
+				if err != nil {
+					return nil, err
+				}
 			}
 		}
 		return &keys.Keys{
@@ -376,6 +377,9 @@ func GetKeys(secretKey string, keyType proto.KeyType) (*keys.Keys, error) {
 			privateKey, publicKey, err = GetSecp256k1KeysFromHex(secretKey)
 			if err != nil {
 				privateKey, publicKey, err = GetSecp256k1KeysFromBase58(secretKey)
+				if err != nil {
+					return nil, err
+				}
 			}
 		}
 		return &keys.Keys{

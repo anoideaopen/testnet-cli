@@ -47,7 +47,7 @@ var getTxIDFromBlockCmd = &cobra.Command{
 			}
 
 			fmt.Println(chdr.GetTxId())
-			fmt.Println(payload.GetData())
+			fmt.Println(payload.String())
 		}
 	},
 }
