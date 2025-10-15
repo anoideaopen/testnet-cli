@@ -3,7 +3,6 @@ package service
 import (
 	"crypto/ecdsa"
 	"crypto/rand"
-	"crypto/x509"
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -28,6 +27,7 @@ func Sign(k *keys.Keys, channel string, chaincode string, methodName string, arg
 	nonce := GetNonce()
 	publicKeyBase58, err := ConvertPublicKeyToBase58(k)
 	if err != nil {
+		logger.Error("failed ConvertPublicKeyToBase58", zap.Error(err))
 		return nil, "", err
 	}
 	result := append(append([]string{methodName, uuid.NewString(), chaincode, channel}, args...), nonce, publicKeyBase58)
@@ -246,7 +246,7 @@ func ConvertPrivateKeyToHex(k *keys.Keys) (string, error) {
 	}
 }
 
-// ConvertPrivateKeyToBase58Check - use privateKey with standard encoded type - Base58Check
+// ConvertPrivateKeyToBase58CheckFromBytes - use privateKey with standard encoded type - Base58Check
 func ConvertPrivateKeyToBase58CheckFromBytes(privateKey []byte) string {
 	encoded := base58.CheckEncode(privateKey[1:], privateKey[0])
 	return encoded
@@ -295,10 +295,7 @@ func ConvertPublicKeyToBase58(k *keys.Keys) (string, error) {
 		if k.PublicKeySecp256k1 == nil {
 			return "", errors.New("secp256k1 public key is nil")
 		}
-		pubBytes, err := x509.MarshalPKIXPublicKey(k.PublicKeySecp256k1)
-		if err != nil {
-			return "", errors.New("failed to marshal secp256k1 public key: " + err.Error())
-		}
+		pubBytes := crypto.FromECDSAPub(k.PublicKeySecp256k1)
 		k.PublicKeyBase58 = base58.Encode(pubBytes)
 		return k.PublicKeyBase58, nil
 
@@ -358,6 +355,7 @@ func GetKeys(secretKey string, keyType proto.KeyType) (*keys.Keys, error) {
 	case proto.KeyType_ed25519:
 		privateKey, publicKey, err := GetPrivateKeySKFromBase58Check(secretKey)
 		if err != nil {
+
 			privateKey, publicKey, err = GetPrivateKeySKFromHex(secretKey)
 			if err != nil {
 				privateKey, publicKey, err = GetPrivateKeySKFromBase58(secretKey)
@@ -455,6 +453,7 @@ func GetSecp256k1KeysFromHex(secretKey string) (*ecdsa.PrivateKey, *ecdsa.Public
 // GetSecp256k1KeysFromBase58 - get secp256k1 private key by Base58 encoded string
 func GetSecp256k1KeysFromBase58(secretKey string) (*ecdsa.PrivateKey, *ecdsa.PublicKey, error) {
 	privBytes := base58.Decode(secretKey)
+	fmt.Printf("[DEBUG] %T decode len=%d bytes=%x\n", secretKey, len(privBytes), privBytes)
 	priv, err := crypto.ToECDSA(privBytes)
 	if err != nil {
 		return nil, nil, err

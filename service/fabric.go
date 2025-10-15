@@ -13,8 +13,8 @@ import (
 	"github.com/anoideaopen/foundation/proto"
 	"github.com/anoideaopen/testnet-cli/logger"
 	pb "github.com/golang/protobuf/proto" //nolint:staticcheck
-	"github.com/hyperledger/fabric-protos-go/common"
-	"github.com/hyperledger/fabric-protos-go/peer"
+	"github.com/hyperledger/fabric-protos-go-apiv2/common"
+	"github.com/hyperledger/fabric-protos-go-apiv2/peer"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/channel"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/ledger"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/resmgmt"
@@ -325,7 +325,7 @@ func (hlf *HLFClient) Invoke(waitBatch bool, channelID string, chaincodeName str
 			logger.GetLogger().Info("ccEvent.ChaincodeID: %s " + ccEvent.ChaincodeID)
 			logger.GetLogger().Info("ccEvent.EventName: %s " + ccEvent.EventName)
 			logger.GetLogger().Info("ccEvent.SourceURL: %s " + ccEvent.SourceURL)
-			logger.GetLogger().Error("ccEvent.EventName", zap.String("ccEvent.EventName", ccEvent.EventName))
+			logger.GetLogger().Debug("ccEvent.EventName", zap.String("ccEvent.EventName", ccEvent.EventName))
 			logger.Debug("ccEvent.EventName", zap.String("ccEvent.EventName", ccEvent.EventName))
 
 			if ccEvent.EventName == BatchExecuteEvent && ccEvent.ChaincodeID == channelID {
@@ -344,7 +344,6 @@ func (hlf *HLFClient) Invoke(waitBatch bool, channelID string, chaincodeName str
 							zap.Int32("event.Error.Code", event.GetError().GetCode()),
 							zap.Error(err),
 						)
-
 						continue
 					}
 				}
