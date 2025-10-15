@@ -355,7 +355,6 @@ func GetKeys(secretKey string, keyType proto.KeyType) (*keys.Keys, error) {
 	case proto.KeyType_ed25519:
 		privateKey, publicKey, err := GetPrivateKeySKFromBase58Check(secretKey)
 		if err != nil {
-
 			privateKey, publicKey, err = GetPrivateKeySKFromHex(secretKey)
 			if err != nil {
 				privateKey, publicKey, err = GetPrivateKeySKFromBase58(secretKey)
@@ -453,7 +452,6 @@ func GetSecp256k1KeysFromHex(secretKey string) (*ecdsa.PrivateKey, *ecdsa.Public
 // GetSecp256k1KeysFromBase58 - get secp256k1 private key by Base58 encoded string
 func GetSecp256k1KeysFromBase58(secretKey string) (*ecdsa.PrivateKey, *ecdsa.PublicKey, error) {
 	privBytes := base58.Decode(secretKey)
-	fmt.Printf("[DEBUG] %T decode len=%d bytes=%x\n", secretKey, len(privBytes), privBytes)
 	priv, err := crypto.ToECDSA(privBytes)
 	if err != nil {
 		return nil, nil, err
