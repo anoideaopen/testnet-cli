@@ -1,11 +1,11 @@
 package cmd
 
 import (
-	"crypto/ed25519"
 	"fmt"
 
+	"github.com/anoideaopen/foundation/proto"
 	"github.com/anoideaopen/testnet-cli/logger"
-	"github.com/anoideaopen/testnet-cli/utils"
+	"github.com/anoideaopen/testnet-cli/service"
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -22,20 +22,21 @@ var addressCmd = &cobra.Command{
 		}
 
 		_, _, err := base58.CheckDecode(secretKey)
-		var publicKey ed25519.PublicKey
+		var publicKey string
 		if err == nil {
 			var err error
 
-			_, publicKey, err = utils.GetPrivateKey(secretKey)
+			keyType := proto.KeyType(config.KeyType)
+			publicKey, err = service.GetPublicKey(secretKey, keyType)
 			if err != nil {
 				logger.Error("GetPrivateKey", zap.Error(err))
 				return
 			}
 		} else {
-			publicKey = base58.Decode(secretKey)
+			publicKey = secretKey
 		}
 
-		addr, err := utils.GetAddressByPublicKey(publicKey)
+		addr, err := service.GetAddressByPublicKey(publicKey)
 		if err != nil {
 			logger.Error("GetAddressByPublicKey", zap.Error(err))
 			return

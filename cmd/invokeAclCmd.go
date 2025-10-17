@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/anoideaopen/foundation/keys"
+	"github.com/anoideaopen/foundation/proto"
 	"github.com/anoideaopen/testnet-cli/logger"
-	"github.com/anoideaopen/testnet-cli/utils"
+	"github.com/anoideaopen/testnet-cli/service"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
@@ -36,22 +38,23 @@ var invokeACLCmd = &cobra.Command{ //nolint:unused
 			fmt.Printf("    - '%v'\n", arg)
 		}
 
-		var validators []utils.SignerInfo
+		var validators []*keys.Keys
 		validatorsKey := strings.Split(config.SecretKey, ",")
+		keyType := proto.KeyType(config.KeyType)
+
 		for _, secretKey := range validatorsKey {
 			logger.Info("secretKey", zap.String("secretKey", secretKey))
-			privateKey, publicKey, err := utils.GetPrivateKey(secretKey)
+
+			k, err := service.GetKeys(secretKey, keyType)
 			if err != nil {
-				msg := "Failed to GetPrivateKeySK " + secretKey
+				msg := "Failed to GetPrivateKey " + secretKey
 				FatalError(msg, err)
 			}
-			signerInfo := utils.SignerInfo{}
-			signerInfo.PublicKey = publicKey
-			signerInfo.PrivateKey = privateKey
-			validators = append(validators, signerInfo)
+
+			validators = append(validators, k)
 		}
 
-		signedMessageArg, _, err := utils.SignACL(validators, methodName, address, reason, reasonID, newPkey)
+		signedMessageArg, _, err := service.SignACL(validators, methodName, address, reason, reasonID, newPkey)
 		logger.Debug("--- signedMessage")
 		for i, arg := range signedMessageArg {
 			fmt.Printf("%d\n", i)

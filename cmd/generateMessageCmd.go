@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/anoideaopen/testnet-cli/logger"
-	"github.com/anoideaopen/testnet-cli/utils"
+	"github.com/anoideaopen/testnet-cli/service"
 	"github.com/spf13/cobra"
 )
 
@@ -32,7 +32,7 @@ var generateMessageCmd = &cobra.Command{ //nolint:unused
 
 		validatorPublicKeys := methodArgs[0]
 
-		message := utils.GenerateMessage(strings.Split(validatorPublicKeys, ","), channelID, config.ChaincodeName, methodName, methodArgs[1:])
+		message := service.GenerateMessage(strings.Split(validatorPublicKeys, ","), channelID, config.ChaincodeName, methodName, methodArgs[1:])
 		file, err := os.Create("message.txt")
 		if err != nil {
 			return

@@ -63,7 +63,7 @@ var convertCmd = &cobra.Command{
 		} else if from == base58Str && to == "sum256base58Check" {
 			bytes := base58.Decode(convertedString)
 			if len(bytes) != ed25519.PublicKeySize {
-				fmt.Printf("incorrect publik key size %d but expected %d\n", len(bytes), ed25519.PublicKeySize)
+				fmt.Printf("incorrect public key size %d but expected %d\n", len(bytes), ed25519.PublicKeySize)
 			}
 			hash := sha3.Sum256(bytes)
 			result := base58.CheckEncode(hash[1:], hash[0])

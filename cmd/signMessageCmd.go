@@ -5,7 +5,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/anoideaopen/testnet-cli/utils"
+	"github.com/anoideaopen/foundation/proto"
+	"github.com/anoideaopen/testnet-cli/service"
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/spf13/cobra"
 )
@@ -20,24 +21,26 @@ var signMessageCmd = &cobra.Command{ //nolint:unused
 			FatalError("message.txt", err)
 		}
 
-		privateKey, publicKey, err := utils.GetPrivateKey(config.SecretKey)
+		keyType := proto.KeyType(config.KeyType)
+		k, err := service.GetKeys(config.SecretKey, keyType)
 		if err != nil {
 			msg := "Failed to GetPrivateKeySK " + config.SecretKey
 			FatalError(msg, err)
 		}
-		signerInfo := utils.SignerInfo{}
-		signerInfo.PublicKey = publicKey
-		signerInfo.PrivateKey = privateKey
 
 		result := strings.Split(string(data), "\n")
-		signatureBytes, _, err := utils.SignMessage(signerInfo, result)
+		signatureBytes, _, err := service.SignMessage(k, keyType, result)
 		if err != nil {
 			FatalError("Error SignMessage", err)
 		}
 		signature := base58.Encode(signatureBytes)
 
 		// save to file
-		file, err := os.Create(fmt.Sprintf("signature-%s.txt", base58.Encode(signerInfo.PublicKey)))
+		publicKey, err := service.GetPublicKey(config.SecretKey, keyType)
+		if err != nil {
+			FatalError("Error GetPublicKey", err)
+		}
+		file, err := os.Create(fmt.Sprintf("signature-%s.txt", publicKey))
 		if err != nil {
 			FatalError("Error create signature-%s.txt", err)
 		}

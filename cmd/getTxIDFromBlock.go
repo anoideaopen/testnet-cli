@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/golang/protobuf/proto" //nolint:staticcheck
-	cb "github.com/hyperledger/fabric-protos-go/common"
+	cb "github.com/hyperledger/fabric-protos-go-apiv2/common"
 	"github.com/spf13/cobra"
 )
 
@@ -47,7 +47,7 @@ var getTxIDFromBlockCmd = &cobra.Command{
 			}
 
 			fmt.Println(chdr.GetTxId())
-			fmt.Println(payload.GetData())
+			fmt.Println(payload.String())
 		}
 	},
 }

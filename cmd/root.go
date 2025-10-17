@@ -43,6 +43,7 @@ func init() {
 	rootCmd.PersistentFlags().IntVarP(&config.NumberRequest, "numberRequest", "n", 1, "number request")
 	rootCmd.PersistentFlags().IntVarP(&config.RequestsPerSecond, "requestsPerSecond", "t", 1, "requests per second")
 	rootCmd.PersistentFlags().StringVarP(&config.ChaincodeName, "chaincode", "c", "", "chaincode name on which this command should be executed")
+	rootCmd.PersistentFlags().VarP(&config.KeyType, "keyType", "k", "key type: ed25519 - default | secp256k1 | gost")
 	rootCmd.PersistentFlags().StringVarP(&config.SecretKey, "secretKey", "s", "", "private key in format base58 or base58check or hex (you can use func 'cli privkey' to gen private key)")
 	rootCmd.PersistentFlags().StringVarP(&config.Peers, "peers", "p", "", "parameter for invoke request. don't wait event 'batchExecute'")
 	rootCmd.PersistentFlags().StringVarP(&config.ResponseType, "responseType", "r", "resp", "response type 'tx','resp'")

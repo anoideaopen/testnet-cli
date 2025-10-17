@@ -8,7 +8,7 @@ import (
 
 	"github.com/anoideaopen/testnet-cli/logger"
 	"github.com/golang/protobuf/proto" //nolint:staticcheck
-	"github.com/hyperledger/fabric-protos-go/peer"
+	"github.com/hyperledger/fabric-protos-go-apiv2/peer"
 	"github.com/hyperledger/fabric-sdk-go/third_party/github.com/hyperledger/fabric/core/ledger/kvledger/txmgmt/rwsetutil"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
