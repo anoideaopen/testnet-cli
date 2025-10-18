@@ -58,7 +58,7 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}.{{minor}}.{{patch}}
 
-      - name: Build and push channel-transfer Image
+      - name: Build and push test-cli Image
         id: push
         uses: docker/build-push-action@v6
         with:
