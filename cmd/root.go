@@ -74,15 +74,14 @@ func init() {
 	rootCmd.AddCommand(queryCmd)
 	rootCmd.AddCommand(invokeCmd)
 	rootCmd.AddCommand(scriptCmd)
+	rootCmd.AddCommand(invokeACLCmd)
 
 	rootCmd.AddCommand(blockByIDCmd)
 	rootCmd.AddCommand(channelHeightCmd)
 	rootCmd.AddCommand(txCmd)
-
 	rootCmd.AddCommand(statusCmd)
 	// rootCmd.AddCommand(fetchBatchCmd)
 
-	// rootCmd.AddCommand(invokeACLCmd)
 	// rootCmd.AddCommand(chaincodeVersionCmd)
 	rootCmd.AddCommand(convertCmd)
 	rootCmd.AddCommand(getTxIDFromBlockCmd)

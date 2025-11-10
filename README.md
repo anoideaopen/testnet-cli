@@ -675,6 +675,20 @@ Example:
 To send requests to a specific peer(s), you need to specify the --peers parameter "url1,url2,url3"
 Use ```,``` to list the list of peer addresses
 
+### InvokeAcl
+
+All ACL methods must be invoked through `invokeAcl`, **except** the following:
+
+- `ChangePublicKeyWithTypeAndBase58Signature`
+- `ChangePublicKeyWithBase58Signature`
+
+Example of calling an ACL method via `invokeAcl`:
+
+```shell
+./testnet-cli --config ./bh-dev/cli.yaml -s 6fb7f9ad0c307d8fa80a5e9918002c9dbb066eb14e7175fde647cd0e58a8a5de974a32f42be7b72d735d80843106d87add11c5b107b6e2429dea43a1250d4a2b invokeAcl acl addAdditionalKey xfvpLjdYAx94ixGqU3N2mvZN7D5Y79NP26DTeGWgn4f1gktVk Qx9KnoJCRqks8yr8BawFxRPpHfvFR7EtGdFfmtMGWCoTipaWZrspGSSEyTCTNt4KuXzDGDp31q8vzU1fWNSso2oB "[\"sign\",\"validator\"]"
+```
+
+
 #### Invoke with signed args
 
 Sign args and send invoke to hlf. Required connection to hlf.

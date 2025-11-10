@@ -60,10 +60,10 @@ func Sign(k *keys.Keys, channel string, chaincode string, methodName string, arg
 // It builds a message from the provided method name, address, reason, reasonID, new public key, and nonce.
 // Each signer signs the same message using their private key, and all signatures are collected.
 // Returns the message with all signatures, the message hash, and an error if any occurred.
-func SignACL(signers []*keys.Keys, methodName string, address string, reason string, reasonID string, newPkey string) ([]string, string, error) {
+func SignACL(signers []*keys.Keys, methodName string, args []string) ([]string, string, error) {
 	nonce := GetNonce()
 
-	result := []string{methodName, address, reason, reasonID, newPkey, nonce}
+	result := append([]string{methodName}, append(args, nonce)...)
 	for _, k := range signers {
 		pubBase58, err := ConvertPublicKeyToBase58(k)
 		if err != nil {
