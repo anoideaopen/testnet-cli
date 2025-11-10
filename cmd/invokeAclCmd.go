@@ -14,7 +14,7 @@ import (
 
 // const noBatch = true
 
-var invokeACLCmd = &cobra.Command{ //nolint:unused
+var invokeACLCmd = &cobra.Command{
 	Use:   "invokeAcl channelID methodName [optional method arguments]",
 	Short: "invoke acl version with signature in hex - v0.8.1-0.0.2 and earlier",
 	Args:  cobra.MinimumNArgs(2), //nolint:gomnd
@@ -31,35 +31,40 @@ var invokeACLCmd = &cobra.Command{ //nolint:unused
 			fmt.Printf("[%d] '%v'\n", i, arg)
 		}
 
-		var validators []*keys.Keys
-		validatorsKey := strings.Split(config.SecretKey, ",")
-		keyType := proto.KeyType(config.KeyType)
+		var reqArgs []string
+		if config.SecretKey != "" {
+			var validators []*keys.Keys
+			validatorsKey := strings.Split(config.SecretKey, ",")
+			keyType := proto.KeyType(config.KeyType)
 
-		for _, secretKey := range validatorsKey {
-			logger.Info("secretKey", zap.String("secretKey", secretKey))
+			for _, secretKey := range validatorsKey {
+				logger.Info("secretKey", zap.String("secretKey", secretKey))
 
-			k, err := service.GetKeys(secretKey, keyType)
-			if err != nil {
-				FatalError("Failed to GetPrivateKey "+secretKey, err)
+				k, err := service.GetKeys(secretKey, keyType)
+				if err != nil {
+					FatalError("Failed to GetPrivateKey "+secretKey, err)
+				}
+
+				validators = append(validators, k)
 			}
 
-			validators = append(validators, k)
+			var err error
+			reqArgs, _, err = service.SignACL(validators, methodName, methodArgs)
+			if err != nil {
+				FatalError("Failed to sign ACL", err)
+			}
+
+			fmt.Println("Signed message arguments:")
+		} else {
+			reqArgs = methodArgs
+			fmt.Println("Unsigned message arguments:")
 		}
 
-		signedMessageArg, _, err := service.SignACL(validators, methodName, methodArgs)
-		if err != nil {
-			FatalError("Failed to sign ACL", err)
-		}
-
-		fmt.Println("Signed message arguments:")
-		for i, arg := range signedMessageArg {
+		for i, arg := range reqArgs {
 			fmt.Printf("[%d] %v\n", i, arg)
 		}
-		if err != nil {
-			FatalError("err signedMessage", err)
-		}
 
-		response, err := HlfClient.Invoke(false, channelID, config.ChaincodeName, methodName, signedMessageArg)
+		response, err := HlfClient.Invoke(false, channelID, config.ChaincodeName, methodName, reqArgs)
 		if err != nil {
 			FatalError("Invoke", err)
 		}
