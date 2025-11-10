@@ -23,19 +23,12 @@ var invokeACLCmd = &cobra.Command{ //nolint:unused
 
 		channelID, methodName, methodArgs := handlerArgs(args)
 
-		logger.Debug(channelID)
-		logger.Debug(methodName)
-		fmt.Printf("%v\n", methodArgs)
+		logger.Debug("channelID", zap.String("channelID", channelID))
+		logger.Debug("methodName", zap.String("methodName", methodName))
+		logger.Debug("methodArgs", zap.Any("methodArgs", methodArgs))
 
-		address := methodArgs[0]
-		reason := methodArgs[1]
-		reasonID := methodArgs[2]
-		newPkey := methodArgs[3]
-
-		logger.Debug("methodArgs")
 		for i, arg := range methodArgs {
-			fmt.Printf("[%d]\n", i)
-			fmt.Printf("    - '%v'\n", arg)
+			fmt.Printf("[%d] '%v'\n", i, arg)
 		}
 
 		var validators []*keys.Keys
@@ -47,18 +40,20 @@ var invokeACLCmd = &cobra.Command{ //nolint:unused
 
 			k, err := service.GetKeys(secretKey, keyType)
 			if err != nil {
-				msg := "Failed to GetPrivateKey " + secretKey
-				FatalError(msg, err)
+				FatalError("Failed to GetPrivateKey "+secretKey, err)
 			}
 
 			validators = append(validators, k)
 		}
 
-		signedMessageArg, _, err := service.SignACL(validators, methodName, address, reason, reasonID, newPkey)
-		logger.Debug("--- signedMessage")
+		signedMessageArg, _, err := service.SignACL(validators, methodName, methodArgs)
+		if err != nil {
+			FatalError("Failed to sign ACL", err)
+		}
+
+		fmt.Println("Signed message arguments:")
 		for i, arg := range signedMessageArg {
-			fmt.Printf("%d\n", i)
-			fmt.Printf("%v\n", arg)
+			fmt.Printf("[%d] %v\n", i, arg)
 		}
 		if err != nil {
 			FatalError("err signedMessage", err)
