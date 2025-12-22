@@ -12,6 +12,7 @@ import (
 	"github.com/anoideaopen/foundation/proto"
 	"github.com/anoideaopen/testnet-cli/logger"
 	"github.com/btcsuite/btcutil/base58"
+	gost3410 "github.com/ddulesov/gogost/gost3410"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/google/uuid"
 	"go.uber.org/zap"
@@ -160,7 +161,12 @@ func GeneratePrivateKey(keyType proto.KeyType) (string, error) {
 	case proto.KeyType_secp256k1:
 		b = crypto.FromECDSA(k.PrivateKeySecp256k1)
 	case proto.KeyType_gost:
-		return "", errors.New("GOST key generation not implemented")
+		_, pk, err := generateGOSTKeys()
+		if err != nil {
+			return "", err
+		}
+		b = pk.Raw()
+
 	default:
 		return "", errors.New("unsupported key type")
 	}
@@ -198,7 +204,14 @@ func GeneratePrivateAndPublicKey(keyType proto.KeyType) (*keys.Keys, error) {
 		return k, nil
 
 	case proto.KeyType_gost:
-		return nil, errors.New("GOST key generation not implemented yet")
+		publicKey, privateKey, err := generateGOSTKeys()
+		if err != nil {
+			return nil, err
+		}
+		k.KeyType = proto.KeyType_gost
+		k.PrivateKeyGOST = privateKey
+		k.PublicKeyGOST = publicKey
+		return k, nil
 
 	default:
 		return nil, errors.New("unsupported key type")
@@ -239,7 +252,10 @@ func ConvertPrivateKeyToHex(k *keys.Keys) (string, error) {
 		return hex.EncodeToString(privBytes), nil
 
 	case proto.KeyType_gost:
-		return "", errors.New("GOST key type not implemented")
+		if k.PrivateKeyGOST == nil {
+			return "", errors.New("gost private key is nil")
+		}
+		return hex.EncodeToString(k.PrivateKeyGOST.Raw()), nil
 
 	default:
 		return "", errors.New("unsupported key type: " + k.KeyType.String())
@@ -271,7 +287,10 @@ func ConvertPrivateKeyToBase58Check(k *keys.Keys) (string, error) {
 		privateKeyBytes = crypto.FromECDSA(k.PrivateKeySecp256k1)
 
 	case proto.KeyType_gost:
-		return "", errors.New("GOST key type not implemented")
+		if k.PrivateKeyGOST == nil {
+			return "", errors.New("gost private key is nil")
+		}
+		privateKeyBytes = k.PrivateKeyGOST.Raw()
 
 	default:
 		return "", errors.New("unsupported key type: " + k.KeyType.String())
@@ -300,8 +319,12 @@ func ConvertPublicKeyToBase58(k *keys.Keys) (string, error) {
 		return k.PublicKeyBase58, nil
 
 	case proto.KeyType_gost:
-		// TODO: реализовать для GOST позже
-		return "", errors.New("GOST key type not yet implemented")
+		if k.PublicKeyGOST == nil {
+			return "", errors.New("gost public key is nil")
+		}
+		pubBytes := k.PublicKeyGOST.Raw()
+		k.PublicKeyBase58 = base58.Encode(pubBytes)
+		return k.PublicKeyBase58, nil
 	default:
 		return "", errors.New("unsupported key type: " + k.KeyType.String())
 	}
@@ -341,8 +364,10 @@ func GetPublicKey(secretKey string, keyType proto.KeyType) (string, error) {
 		return base58.Encode(pubBytes), nil
 
 	case proto.KeyType_gost:
-		return "", errors.New("GOST key type decoding is not yet implemented")
-
+		if k.PublicKeyGOST == nil {
+			return "", errors.New("gost public key is nil")
+		}
+		return base58.Encode(k.PublicKeyGOST.Raw()), nil
 	default:
 		return "", fmt.Errorf("unsupported key type: %v", k.KeyType)
 	}
@@ -385,7 +410,22 @@ func GetKeys(secretKey string, keyType proto.KeyType) (*keys.Keys, error) {
 			PrivateKeySecp256k1: privateKey,
 		}, nil
 	case proto.KeyType_gost:
-		return nil, errors.New("GOST key type decoding is not yet implemented")
+		privateKey, publicKey, err := GetGostKeysFromBase58Check(secretKey)
+		if err != nil {
+			privateKey, publicKey, err = GetGostKeysFromHex(secretKey)
+			if err != nil {
+				privateKey, publicKey, err = GetGostKeysFromBase58(secretKey)
+				if err != nil {
+					return nil, err
+				}
+			}
+		}
+
+		return &keys.Keys{
+			KeyType:        proto.KeyType_gost,
+			PublicKeyGOST:  publicKey,
+			PrivateKeyGOST: privateKey,
+		}, nil
 
 	default:
 		return nil, errors.New("unsupported key type: " + keyType.String())
@@ -457,4 +497,71 @@ func GetSecp256k1KeysFromBase58(secretKey string) (*ecdsa.PrivateKey, *ecdsa.Pub
 		return nil, nil, err
 	}
 	return priv, &priv.PublicKey, nil
+}
+
+func GetGostKeysFromBase58Check(secretKey string) (*gost3410.PrivateKey, *gost3410.PublicKey, error) {
+	raw, _, err := base58.CheckDecode(secretKey)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return gostKeysFromRaw(raw)
+}
+
+func GetGostKeysFromHex(secretKey string) (*gost3410.PrivateKey, *gost3410.PublicKey, error) {
+	raw, err := hex.DecodeString(secretKey)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return gostKeysFromRaw(raw)
+}
+
+func GetGostKeysFromBase58(secretKey string) (*gost3410.PrivateKey, *gost3410.PublicKey, error) {
+	raw := base58.Decode(secretKey)
+	if len(raw) == 0 {
+		return nil, nil, errors.New("empty base58 gost private key")
+	}
+
+	return gostKeysFromRaw(raw)
+}
+
+func generateGOSTKeys() (*gost3410.PublicKey, *gost3410.PrivateKey, error) {
+	sKeyGOST, err := gost3410.GenPrivateKey(
+		gost3410.CurveIdGostR34102001CryptoProXchAParamSet(),
+		gost3410.Mode2001,
+		rand.Reader,
+	)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	pKeyGOST, err := sKeyGOST.PublicKey()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return pKeyGOST, sKeyGOST, nil
+}
+
+func gostKeysFromRaw(raw []byte) (*gost3410.PrivateKey, *gost3410.PublicKey, error) {
+	if len(raw) == 0 {
+		return nil, nil, errors.New("empty gost private key")
+	}
+
+	priv, err := gost3410.NewPrivateKey(
+		gost3410.CurveIdGostR34102001CryptoProXchAParamSet(),
+		gost3410.Mode2001,
+		raw,
+	)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	pub, err := priv.PublicKey()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return priv, pub, nil
 }
