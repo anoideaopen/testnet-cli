@@ -12,7 +12,7 @@ import (
 	"github.com/anoideaopen/foundation/proto"
 	"github.com/anoideaopen/testnet-cli/logger"
 	"github.com/btcsuite/btcutil/base58"
-	gost3410 "github.com/ddulesov/gogost/gost3410"
+	"github.com/ddulesov/gogost/gost3410"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/google/uuid"
 	"go.uber.org/zap"
