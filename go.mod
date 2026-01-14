@@ -7,7 +7,7 @@ require (
 	github.com/anoideaopen/foundation v0.1.5
 	github.com/btcsuite/btcutil v1.0.2
 	github.com/ddulesov/gogost v1.0.0
-	github.com/ethereum/go-ethereum v1.16.7
+	github.com/ethereum/go-ethereum v1.16.8
 	github.com/go-pg/pg/v10 v10.15.0
 	github.com/golang/protobuf v1.5.4
 	github.com/google/uuid v1.6.0
