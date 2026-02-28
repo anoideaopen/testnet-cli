@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/golang/protobuf/proto" //nolint:staticcheck
 	cb "github.com/hyperledger/fabric-protos-go-apiv2/common"
 	"github.com/spf13/cobra"
+	"google.golang.org/protobuf/proto"
 )
 
 var getTxIDFromBlockCmd = &cobra.Command{

@@ -32,13 +32,13 @@ var sendRequestCmd = &cobra.Command{ //nolint:unused
 
 		logger.Debug("read data from message.txt")
 		var result []string
-		for _, s := range strings.Split(string(data), "\n") {
+		for s := range strings.SplitSeq(string(data), "\n") {
 			result = append(result, s)
 			logger.Debug(s)
 		}
 
 		var signatures []string
-		for _, signatureFilePath := range strings.Split(signatureFilePaths, ",") {
+		for signatureFilePath := range strings.SplitSeq(signatureFilePaths, ",") {
 			filename := fmt.Sprintf("signature-%s.txt", signatureFilePath)
 			data, err := os.ReadFile(filename)
 			logger.Debug(fmt.Sprintf("filename %s\n", filename))

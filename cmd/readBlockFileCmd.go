@@ -5,7 +5,7 @@ package cmd
 //	"fmt"
 //	"os"
 //
-//	"github.com/golang/protobuf/proto"
+//	"google.golang.org/protobuf/proto"
 //	cb "github.com/hyperledger/fabric-protos-go-apiv2/common"
 //	"github.com/spf13/cobra"
 // )

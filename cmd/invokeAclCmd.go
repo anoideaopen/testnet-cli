@@ -33,8 +33,8 @@ var invokeACLCmd = &cobra.Command{
 
 		var reqArgs []string
 		if config.SecretKey != "" {
-			var validators []*keys.Keys
 			validatorsKey := strings.Split(config.SecretKey, ",")
+			validators := make([]*keys.Keys, 0, len(validatorsKey))
 			keyType := proto.KeyType(config.KeyType)
 
 			for _, secretKey := range validatorsKey {

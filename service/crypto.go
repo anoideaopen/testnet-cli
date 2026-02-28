@@ -3,6 +3,7 @@ package service
 import (
 	"crypto/ecdsa"
 	"crypto/rand"
+	"crypto/sha3"
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -17,7 +18,6 @@ import (
 	"github.com/google/uuid"
 	"go.uber.org/zap"
 	"golang.org/x/crypto/ed25519"
-	"golang.org/x/crypto/sha3"
 )
 
 // Sign creates a signed message using the provided key and transaction details.

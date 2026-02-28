@@ -45,7 +45,7 @@ func (b Request) String() string {
 
 // CreateSchema creates database schema for Batch and Request models.
 func CreateSchema(db *pg.DB) error {
-	models := []interface{}{
+	models := []any{
 		(*Batch)(nil),
 		(*Request)(nil),
 	}

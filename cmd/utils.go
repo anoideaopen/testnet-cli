@@ -6,12 +6,12 @@ import (
 
 	"github.com/anoideaopen/testnet-cli/logger"
 	"github.com/anoideaopen/testnet-cli/service"
-	"github.com/golang/protobuf/proto" //nolint:staticcheck
 	"github.com/hyperledger/fabric-protos-go-apiv2/common"
 	"github.com/hyperledger/fabric-protos-go-apiv2/msp"
 	"github.com/hyperledger/fabric-protos-go-apiv2/peer"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
+	"google.golang.org/protobuf/proto"
 )
 
 func handlerArgs(args []string) (string, string, []string) {
