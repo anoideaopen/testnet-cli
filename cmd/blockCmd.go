@@ -6,10 +6,10 @@ import (
 	"strconv"
 
 	"github.com/anoideaopen/testnet-cli/logger"
-	"github.com/golang/protobuf/proto" //nolint:staticcheck
 	cb "github.com/hyperledger/fabric-protos-go-apiv2/common"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
+	"google.golang.org/protobuf/proto"
 )
 
 var blockByIDCmd = &cobra.Command{
@@ -33,15 +33,12 @@ var blockByIDCmd = &cobra.Command{
 		if len(peer) == 0 {
 			FatalError("peer is empty", nil)
 		}
-		block, err := getBlock(channelID, blockID, peer)
-		if err != nil {
-			FatalError("failed to get block", err)
-		}
+		block := getBlock(channelID, blockID, peer)
 		if block == nil {
 			FatalError("failed to get block, block nil", errors.New("failed to get block, block nil"))
 		}
 		blockID = strconv.FormatUint(block.GetHeader().GetNumber(), 10)
-		err = saveBlock(channelID, blockID, block)
+		err := saveBlock(channelID, blockID, block)
 		if err != nil {
 			FatalError("failed to save block", err)
 		}
@@ -49,14 +46,13 @@ var blockByIDCmd = &cobra.Command{
 	},
 }
 
-func getBlock(channelID string, blockID string, peer string) (*cb.Block, error) {
+func getBlock(channelID string, blockID string, peer string) *cb.Block {
 	block, err := HlfClient.QueryBlock(channelID, blockID, peer)
 	if err != nil {
 		FatalError("Failed to QueryBlock", err)
-		return nil, err
 	}
 
-	return block, nil
+	return block
 }
 
 func saveBlock(channelID string, blockID string, block *cb.Block) error {

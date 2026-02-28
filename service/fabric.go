@@ -12,7 +12,6 @@ import (
 	"github.com/anoideaopen/foundation/keys"
 	"github.com/anoideaopen/foundation/proto"
 	"github.com/anoideaopen/testnet-cli/logger"
-	pb "github.com/golang/protobuf/proto" //nolint:staticcheck
 	"github.com/hyperledger/fabric-protos-go-apiv2/common"
 	"github.com/hyperledger/fabric-protos-go-apiv2/peer"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/channel"
@@ -24,6 +23,7 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/core/config"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
 	"go.uber.org/zap"
+	pb "google.golang.org/protobuf/proto"
 )
 
 const (
@@ -289,7 +289,7 @@ func (hlf *HLFClient) Invoke(waitBatch bool, channelID string, chaincodeName str
 		return nil, err
 	}
 
-	var beforeInvokeData interface{}
+	var beforeInvokeData any
 	if hlf.beforeInvokeHandler != nil {
 		beforeInvokeData, err = hlf.beforeInvokeHandler(channelID, chaincodeName, methodName, methodArgs)
 		if err != nil {
@@ -365,9 +365,9 @@ func (hlf *HLFClient) Invoke(waitBatch bool, channelID string, chaincodeName str
 	return response, err
 }
 
-type HlfAfterInvokeHandler func(beforeInvokeData interface{}, channelID string, chaincodeName string, methodName string, methodArgs []string, response *channel.Response, err error) error
+type HlfAfterInvokeHandler func(beforeInvokeData any, channelID string, chaincodeName string, methodName string, methodArgs []string, response *channel.Response, err error) error
 
-type HlfBeforeInvokeHandler func(channelID string, chaincodeName string, methodName string, methodArgs []string) (interface{}, error)
+type HlfBeforeInvokeHandler func(channelID string, chaincodeName string, methodName string, methodArgs []string) (any, error)
 
 func (hlf *HLFClient) RequestChaincode(
 	chaincodeName string, methodName string, methodArgs []string,
