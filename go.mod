@@ -1,6 +1,6 @@
 module github.com/anoideaopen/testnet-cli
 
-go 1.26.3
+go 1.26.4
 
 require (
 	github.com/anoideaopen/cartridge v0.0.3
