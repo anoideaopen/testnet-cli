@@ -105,7 +105,7 @@ func SignACL(signers []*keys.Keys, methodName string, args []string) ([]string, 
 func SignMessage(k *keys.Keys, keyType proto.KeyType, result []string) ([]byte, []byte, error) {
 	m := []byte(strings.Join(result, ""))
 
-	// Подписываем сообщение в зависимости от типа ключа
+	// We sign the message depending on the type of key
 	message, signature, err := keys.SignMessageByKeyType(keyType, k, m)
 	if err != nil {
 		logger.Error("SignMessageByKeyType", zap.Error(err))
